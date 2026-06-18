@@ -1,0 +1,132 @@
+meta:
+  version: 3
+  flow: Chip
+  substituting_steps:
+
+    # Render the layout after sealring insertion
+    KLayout.Render: null
+    +KLayout.SealRing: KLayout.Render
+
+    # The following can be toggled to disable specific checks during
+    # development. Leave them ENABLED for sign-off (this is the default).
+    #KLayout.DRC: null
+    #Checker.KLayoutDRC: null
+    #KLayout.Antenna: null
+    #Checker.KLayoutAntenna: null
+    #KLayout.Density: null
+    #Checker.KLayoutDensity: null
+    #OpenROAD.IRDropReport: null
+    #Magic.DRC: null
+    #Checker.MagicDRC: null
+    #KLayout.XOR: null
+    #Netgen.LVS: null
+    #Checker.LVS: null
+
+DESIGN_NAME: chip_top
+VERILOG_FILES:
+- dir::../src/chip_top.sv
+- dir::../src/chip_core.sv
+
+# Slightly smaller GDSII file sizes
+PRIMARY_GDSII_STREAMOUT_TOOL: klayout
+
+# SDC files (all three point at the one constraints file)
+PNR_SDC_FILE: dir::chip_top.sdc
+SIGNOFF_SDC_FILE: dir::chip_top.sdc
+FALLBACK_SDC: dir::chip_top.sdc
+
+# Power / ground nets
+VDD_NETS:
+- VDD
+GND_NETS:
+- VSS
+
+# Output-only I/O pads have an unused Y output, and the wafer.space tapeout IP
+# cells are blackboxes with no internal connectivity. Tell LVS/checks to ignore
+# their disconnected ports rather than flagging them.
+IGNORE_DISCONNECTED_MODULES:
+- gf180mcu_fd_io__bi_24t
+- gf180mcu_ws_ip__qrcode_id
+- gf180mcu_ws_ip__shuttle_id
+- gf180mcu_ws_ip__project_id
+- gf180mcu_ws_ip__logo
+- gf180mcu_ws_ip__marker
+
+# Clock — 40 ns period = 25 MHz (the template default)
+CLOCK_PORT: clk_PAD
+CLOCK_NET: clk_pad/Y
+CLOCK_PERIOD: 40 # 25 MHz
+
+# Overfix hold violations (hold MUST close; setup may be run slower in the field)
+PL_RESIZER_HOLD_SLACK_MARGIN: 0.35
+GRT_RESIZER_HOLD_SLACK_MARGIN: 0.3
+
+# Placement density. 35% leaves generous routing/timing headroom; raise it to
+# pack more logic onto the die.
+PL_TARGET_DENSITY_PCT: 35
+GRT_ALLOW_CONGESTION: true
+
+# Allow a larger Y displacement during placement legalization
+PL_MAX_DISPLACEMENT_Y: 200
+
+# Fix antenna violations after detailed routing
+DRT_ANTENNA_REPAIR_ITERS: 10
+DRT_ANTENNA_REPAIR_MARGIN: 10 # %
+
+# PDN
+PDN_CFG: dir::pdn/pdn_cfg.tcl
+PDN_ENABLE_PINS: False
+
+# PDN - Straps
+PDN_VWIDTH: 5
+PDN_HWIDTH: 5
+PDN_VSPACING: 1
+PDN_HSPACING: 1
+PDN_VPITCH: 75
+PDN_HPITCH: 75
+
+# PDN - Core ring
+PDN_CORE_RING: True
+# Maximum metal width without slotting: 30um
+PDN_CORE_RING_VWIDTH: 25
+PDN_CORE_RING_HWIDTH: 25
+PDN_CORE_RING_CONNECT_TO_PADS: True
+PDN_CORE_VERTICAL_LAYER: Metal4
+PDN_CORE_HORIZONTAL_LAYER: Metal3
+PDN_CORE_RING_CONNECT_TO_PAD_LAYERS: [Metal2]
+
+# Do not hard-error on Magic DRC; review violations instead.
+# (Passing Magic DRC is not required for submission, but recommended.)
+ERROR_ON_MAGIC_DRC: False
+
+# Prevent false-positive DRC errors inside vendor I/O cells by flattening them.
+MAGIC_GDS_FLATGLOB:
+- "*_CDNS_*"   # contacts
+
+# Metal2 cannot meet the minimum density limit on its own, so ignore active
+# metal on adjacent layers; dummy metal is promoted to active during precheck.
+KLAYOUT_FILLER_OPTIONS:
+  Metal2_ignore_active: true
+
+# Multiple power pads feed one power domain.
+MAGIC_EXT_UNIQUE: notopports
+
+# Image render settings
+KLAYOUT_RENDER_RESOLUTION: 2048
+KLAYOUT_RENDER_OVERSAMPLING: 3
+KLAYOUT_PROPERTIES: dir::gf180mcu_render.lyp
+
+# DRC settings. workers*threads should equal available hardware threads.
+KLAYOUT_DRC_THREADS: 1
+KLAYOUT_DRC_OPTIONS:
+  decks: "all,-antenna,-density,-cup" # disable CUP for now
+  variant: ref::$PDK
+  workers: max
+KLAYOUT_DENSITY_OPTIONS:
+  decks: "density"
+  variant: ref::$PDK
+  workers: max
+KLAYOUT_ANTENNA_OPTIONS:
+  decks: "antenna"
+  variant: ref::$PDK
+  workers: max

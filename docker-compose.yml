@@ -1,0 +1,55 @@
+# docker-compose.yml — the two containers a beginner needs.
+#
+#   docker compose build sim          # build the simulation image (once)
+#   docker compose run --rm sim ...    # run a command in the sim image
+#   docker compose run --rm harden ... # run LibreLane (Path A)
+#
+# You normally drive these through the Makefile (`make build-sim`, `make sim`,
+# `make harden`) rather than typing compose commands by hand.
+
+services:
+  # ---- Simulation container (we build it from docker/Dockerfile.sim) ----------
+  sim:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.sim
+    image: gf180-waferspace-sim          # local tag, built on demand
+    working_dir: /work
+    volumes:
+      - .:/work                          # the repo, live-mounted
+    environment:
+      # These mirror the design knobs the Makefile/cocotb harness read.
+      PDK_ROOT: /pdk
+      PDK:  ${PDK:-gf180mcuD}
+      SCL:  ${SCL:-gf180mcu_fd_sc_mcu7t5v0}
+      PAD:  ${PAD:-gf180mcu_fd_io}
+      SRAM: ${SRAM:-gf180mcu_fd_ip_sram}
+      SLOT: ${SLOT:-1x0p5}
+    # No default command: the Makefile passes the command (e.g. `make sim`).
+
+  # ---- Hardening container, PATH A: official prebuilt LibreLane image ----------
+  # This image ALREADY contains librelane + OpenROAD + Yosys + KLayout + Magic +
+  # Netgen, so inside it you call `librelane ...` directly (NO `nix develop`).
+  harden:
+    # See docker/Dockerfile.harden for the pinned reference and how to confirm
+    # the exact tag. Building from that Dockerfile lets you pin/override the tag
+    # in ONE place; compose uses the resulting local image.
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.harden
+    image: gf180-waferspace-harden
+    working_dir: /work
+    volumes:
+      - .:/work                          # the repo, live-mounted
+      - pdk:/pdk                         # PDK named volume (~4 GB, persists)
+    environment:
+      PDK_ROOT: /pdk
+      PDK:  ${PDK:-gf180mcuD}
+      SCL:  ${SCL:-gf180mcu_fd_sc_mcu7t5v0}
+      PAD:  ${PAD:-gf180mcu_fd_io}
+      SRAM: ${SRAM:-gf180mcu_fd_ip_sram}
+      SLOT: ${SLOT:-1x0p5}
+    # No default command: scripts/harden.sh passes the librelane invocation.
+
+volumes:
+  pdk:        # named volume holding the gf180mcuD PDK (downloaded by `make pdk`)

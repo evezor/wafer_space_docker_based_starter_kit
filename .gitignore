@@ -1,0 +1,37 @@
+# --- simulation artifacts ---
+*.vvp
+*.vcd
+*.fst
+cocotb/sim_build/
+cocotb/results.xml
+cocotb/__pycache__/
+sim_build/
+
+# --- LibreLane / GDSII outputs (large, regenerated) ---
+librelane/runs/
+final/
+
+# --- PDK (downloaded by `make pdk`, multi-GB; lives in a Docker volume or ./pdk) ---
+.ciel/
+ciel/
+pdk/
+*.pdk
+
+# --- auto-generated RTL defines (created by `make defines` / gen_defines.sh) ---
+src/generated_defines.svh
+generated_defines.svh
+
+# --- local env overrides ---
+.env
+
+# --- python ---
+__pycache__/
+*.pyc
+.venv/
+
+# --- editor / OS cruft ---
+.DS_Store
+Thumbs.db
+
+# --- DRC report cruft ---
+*.lyrdb

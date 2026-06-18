@@ -1,0 +1,28 @@
+# docker/Dockerfile.harden — Path A hardening image.
+#
+# Thin wrapper over the OFFICIAL prebuilt LibreLane image. We FROM it (rather than
+# referencing the tag directly in compose) so the pinned reference lives in ONE
+# place and a beginner can bump it here. The base image already ships librelane +
+# OpenROAD + Yosys + KLayout + Magic + Netgen, so DO NOT run `nix develop` inside;
+# just call `librelane ...` (see scripts/harden.sh).
+
+# <VERIFY: official LibreLane image reference + tag>
+#   Confirm the registry/repository/tag before building. As of writing, LibreLane
+#   publishes images to GitHub Container Registry. To confirm:
+#     1. Read the LibreLane docs "Docker installation" page:
+#        https://librelane.readthedocs.io/  (Installation -> Docker).
+#     2. Or list tags:  https://github.com/librelane/librelane/pkgs/container/librelane
+#     3. Or `docker pull ghcr.io/librelane/librelane:latest` and check it runs
+#        `librelane --version`.
+#   Pin a SPECIFIC tag (not `latest`) for reproducibility once confirmed, ideally
+#   matching the Nix-pinned librelane rev in flake.lock (the template pins
+#   librelane rev 531569a251c493a91905b4596e494c29da99dd0b on the `dev` branch).
+ARG LIBRELANE_IMAGE=ghcr.io/librelane/librelane:latest   # <VERIFY: tag>
+FROM ${LIBRELANE_IMAGE}
+
+# `ciel` (the PDK fetcher) ships with the LibreLane image. If a future image drops
+# it, uncomment:
+# RUN pip3 install --no-cache-dir ciel
+
+WORKDIR /work
+# No CMD: scripts/harden.sh supplies the librelane command at run time.

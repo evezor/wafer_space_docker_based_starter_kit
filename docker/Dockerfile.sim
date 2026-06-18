@@ -1,0 +1,32 @@
+# docker/Dockerfile.sim — the simulation image.
+#
+# Just enough to (a) compile the SystemVerilog scaffold with Icarus and run the
+# self-checking testbench (`make sim` / `make test`, no PDK needed), and
+# (b) optionally run the PDK-aware cocotb harness (`make sim-cocotb`).
+# It intentionally does NOT contain LibreLane/OpenROAD/the PDK — hardening to
+# GDSII is a separate, heavier step (the `harden` service / Path B Nix flow).
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        iverilog \
+        gtkwave \
+        make \
+        git \
+        ca-certificates \
+        python3 \
+        python3-pip \
+        python3-dev \
+        build-essential \
+ && rm -rf /var/lib/apt/lists/*
+
+# cocotb is the Python-driven verification framework the testbench uses.
+# Pin a known-good version so results are reproducible across machines.
+RUN pip3 install --no-cache-dir \
+        "cocotb==1.9.2" \
+        cocotb-bus \
+        pytest \
+        numpy
+
+WORKDIR /work
+CMD ["bash"]
