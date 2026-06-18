@@ -25,6 +25,7 @@ returns physical dies (with optional chip-on-board packaging or full undiced-waf
 - **GitHub org:** <https://github.com/wafer-space>
 - **Project template (upstream):** <https://github.com/wafer-space/gf180mcu-project-template>
 - **Submission precheck:** <https://github.com/wafer-space/gf180mcu-precheck>
+- **Run 1 projects (descriptions + links):** <https://github.com/wafer-space/ws-run1>
 
 > Pricing, slot sizes, and submission rules live on wafer.space and change between shuttles —
 > always confirm the current details there.

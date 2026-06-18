@@ -2,13 +2,20 @@
 
 **Design your own custom chip — simulate it, verify it, and produce a manufacturable layout — without ever having made a chip before.**
 
+<p align="center">
+  <img src="images/run1-reticle.jpg" alt="Closeup of a full reticle on wafer.space's first GF180MCU run (Shuttle G801)" width="680"><br>
+  <sub><i>A full reticle from <a href="https://wafer.space">wafer.space</a>'s first GF180MCU
+  run (Shuttle&nbsp;G801) — browse those 40 designs in the
+  <a href="https://github.com/wafer-space/ws-run1">Run&nbsp;1 projects repo</a>.</i></sub>
+</p>
+
 ---
 
 ## Targeting [wafer.space](https://wafer.space)
 
 This kit exists to take a design all the way to a **[wafer.space](https://wafer.space)** shuttle. wafer.space is a *budget silicon-manufacturing* service — its tagline is **"create integrated circuits without breaking the bank."** It runs shared **GF180MCU** (GlobalFoundries 180 nm) **shuttles**: many independent designs share a single wafer, so you buy one **slot** instead of paying for a whole manufacturing run. You design, simulate, and verify your chip with this kit, then submit the resulting GDSII to a wafer.space shuttle, which returns physical dies (with optional chip-on-board packaging or full undiced-wafer delivery).
 
-**Useful links:** [wafer.space](https://wafer.space) · [Buy a slot / current pricing](https://buy.wafer.space) · [Discord community](https://discord.gg/43y2t53jpE) · [GitHub org](https://github.com/wafer-space) · [Project template](https://github.com/wafer-space/gf180mcu-project-template) · [Submission precheck](https://github.com/wafer-space/gf180mcu-precheck)
+**Useful links:** [wafer.space](https://wafer.space) · [Buy a slot / current pricing](https://buy.wafer.space) · [Discord community](https://discord.gg/43y2t53jpE) · [GitHub org](https://github.com/wafer-space) · [Project template](https://github.com/wafer-space/gf180mcu-project-template) · [Submission precheck](https://github.com/wafer-space/gf180mcu-precheck) · [Run 1 projects](https://github.com/wafer-space/ws-run1)
 
 > Pricing, slot sizes, and submission rules live on wafer.space and change between shuttles — always confirm the current details there.
 
