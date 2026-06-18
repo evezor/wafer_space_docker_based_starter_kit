@@ -8,15 +8,24 @@ This page explains the end-to-end pipeline one stage at a time, so that at any m
 
 Every chip in this kit travels the same road: you **edit** RTL, **simulate** it to check the logic, **verify** it against a golden reference, **harden** it into a layout, **sign it off** with the manufacturability checks, and ship the **GDSII**. The first three stages are fast and need no PDK; the last three are slow and heavy. Here is the whole journey on one screen:
 
-```
-   YOU EDIT                 FAST INNER LOOP (no PDK)            SLOW OUTER LOOP (needs PDK)
-  ┌─────────┐   ┌────────────┐   ┌─────────────────┐   ┌──────────┐   ┌──────────┐   ┌────────┐
-  │ src/    │──►│ simulate   │──►│ verify vs golden │──►│  harden  │──►│ signoff  │──►│  GDSII │
-  │ *.sv    │   │ (make sim) │   │ (self-check TB)  │   │ (harden) │   │ DRC/LVS/ │   │ submit │
-  └─────────┘   └────────────┘   └─────────────────┘   └──────────┘   │ antenna  │   └────────┘
-       ▲                │                  │                 │         └──────────┘
-       └────────────────┴──────────────────┘                 │
-         iterate here until green, cheaply        only when sim is green
+```mermaid
+flowchart LR
+    subgraph inner["Fast inner loop — no PDK · run constantly"]
+        direction LR
+        edit["src/*.sv<br/>(you edit)"]
+        sim["Simulate<br/>make sim"]
+        verify["Verify vs golden<br/>self-check TB"]
+        edit --> sim --> verify
+    end
+    subgraph outer["Slow outer loop — needs PDK · run occasionally"]
+        direction LR
+        harden["Harden<br/>make harden"]
+        signoff["Signoff<br/>DRC / LVS / antenna"]
+        gds["GDSII<br/>(submit)"]
+        harden --> signoff --> gds
+    end
+    verify -- "only when sim is green" --> harden
+    verify -. "iterate until green, cheaply" .-> edit
 ```
 
 > **The key idea:** the left half (edit → simulate → verify) is fast, free, and needs no PDK — you do it hundreds of times. The right half (harden → signoff → GDSII) is slow and heavy — you do it occasionally, *only after the left half is green*. Catching a bug in simulation costs seconds; catching it after hardening costs hours.
