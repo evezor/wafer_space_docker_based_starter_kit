@@ -1,4 +1,4 @@
-# gf180mcu-waferspace-starter
+# wafer_space_docker_based_starter_kit
 
 **Design your own custom chip — simulate it, verify it, and produce a manufacturable layout — without ever having made a chip before.**
 
@@ -49,8 +49,8 @@ This is the hero section. Copy each block exactly. The goal is to get from "noth
 # 0. Install Docker Desktop and git first (see docs/01_GETTING_STARTED.md).
 
 # 1. Get the code.
-git clone https://github.com/<your-org>/gf180mcu-waferspace-starter.git
-cd gf180mcu-waferspace-starter
+git clone https://github.com/evezor/wafer_space_docker_based_starter_kit.git
+cd wafer_space_docker_based_starter_kit
 
 # 2. Build the simulation image (one-time; a few minutes).
 make build-sim
@@ -87,7 +87,7 @@ You ran the same pipeline a real tapeout uses — write RTL → simulate → ver
 ## Directory map
 
 ```
-gf180mcu-waferspace-starter/
+wafer_space_docker_based_starter_kit/
 ├── README.md                  # you are here
 ├── docker-compose.yml         # the two containers: sim + harden
 ├── .env.example               # PDK_ROOT, SLOT, image tags, PDK commit — copy to .env

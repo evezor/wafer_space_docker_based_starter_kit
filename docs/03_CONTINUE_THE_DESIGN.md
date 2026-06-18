@@ -11,7 +11,7 @@ If a term is new, it is defined the first time it appears.
 
 ## This is your design now
 
-The `gf180mcu-waferspace-starter` kit ships a deliberately trivial **core** — a
+The `wafer_space_docker_based_starter_kit` ships a deliberately trivial **core** — a
 *heartbeat* toggle (a slow blink that proves the chip is clocking) plus a free-running
 counter — so the whole pipeline is proven green *before* you change anything.
 

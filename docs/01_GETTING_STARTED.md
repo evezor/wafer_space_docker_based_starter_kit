@@ -77,11 +77,11 @@ git --version
 Get the code and move into it.
 
 ```bash
-git clone https://github.com/<your-org>/gf180mcu-waferspace-starter.git
-cd gf180mcu-waferspace-starter
+git clone https://github.com/evezor/wafer_space_docker_based_starter_kit.git
+cd wafer_space_docker_based_starter_kit
 ```
 
-> **You should see:** git report `Cloning into 'gf180mcu-waferspace-starter'...` and finish without errors, leaving you inside the new directory. Run `ls` to confirm you see `README.md`, `Makefile`, `src/`, and `docs/`.
+> **You should see:** git report `Cloning into 'wafer_space_docker_based_starter_kit'...` and finish without errors, leaving you inside the new directory. Run `ls` to confirm you see `README.md`, `Makefile`, `src/`, and `docs/`.
 
 > 💡 Run `make` with no target at any time to print the list of available commands.
 
