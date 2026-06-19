@@ -29,6 +29,8 @@ hit them. If nothing matches, jump to "Still stuck?" at the bottom.
 | 8 | `make pdk` times out partway through | A transient network failure on a multi-GB download | Just **re-run `make pdk`** — a retry usually completes cleanly. The PDK is ~4 GB; the Nix closure (Path B) is ~7.4 GB. Plan for the download time. |
 | 9 | A testbench "passes" but you don't trust it | The pass condition might be trivially true (it can never fail) | Make the check **strict**: compare **N > 0** samples against a golden vector and require **0 mismatches**. Never loosen a self-checking testbench just to make it pass. See `03_CONTINUE_THE_DESIGN.md`. |
 | 10 | KLayout / OpenROAD GUI won't open on Windows | No X server is available for the container's GUI | Run an X server (e.g. VcXsrv or WSLg) and point `DISPLAY` at it, or open the GDS in a locally installed copy of KLayout. See the note below. |
+| 11 | On **Linux**, `make build-sim` (or any `docker`/`make` command) fails with `permission denied` on `/var/run/docker.sock`, and `sudo make ...` "fixes" it | Your user is **not in the `docker` group**, so only root can reach the Docker daemon | Add yourself to the group instead of using sudo: **`sudo usermod -aG docker $USER`**, then **log out and back in**. Don't keep using `sudo` — it makes container-written files root-owned. See the note below. |
+| 12 | `make pdk` / `make harden` fails with **`pull access denied for gf180-waferspace-harden, repository does not exist or may require 'docker login'`** | The local hardening image was never built, and `docker compose run` tries to **pull** the local-only tag rather than build it | Build it first: **`make build-harden`** (one-time), then re-run. Current Makefiles do this automatically via a `build-harden` dependency — if you don't have that target, `git pull` to update. See the note below. |
 
 ---
 
@@ -50,6 +52,61 @@ variable first.
 
 > **You should see:** with `MSYS_NO_PATHCONV=1` set, the `/work` mount resolves correctly
 > and the container starts without a path error.
+
+---
+
+## Linux Docker permissions — "needs sudo" (#11)
+
+On Linux the Docker daemon socket (`/var/run/docker.sock`) is root-owned, so out of the box
+only `root` can talk to it. A fresh install therefore makes `make build-sim` (and every other
+`docker`/`make` command) fail with a **permission denied** error, and `sudo make ...` looks
+like the fix.
+
+**Don't reach for `sudo`.** The containers live-mount this repo at `/work` and write into a
+shared PDK volume; running them as root makes those files **root-owned**, which causes
+confusing "permission denied" failures later when your normal user tries to read or clean
+them. The correct, one-time fix is to add your user to the `docker` group:
+
+```bash
+sudo usermod -aG docker $USER
+# then LOG OUT and back in (group membership is only picked up on a new login)
+```
+
+> **You should see:** after re-logging in, `docker run hello-world` works **without** `sudo`,
+> and so do all the `make` targets. Full official steps (including rootless mode) are at
+> <https://docs.docker.com/engine/install/linux-postinstall/>.
+
+If you already ran things with `sudo` and now have root-owned files in the repo or PDK
+volume, fix ownership with `sudo chown -R $USER:$USER .` (and re-run `make pdk` if the PDK
+volume got tangled).
+
+---
+
+## "pull access denied for gf180-waferspace-harden" (#12)
+
+```
+Image gf180-waferspace-harden pull access denied for gf180-waferspace-harden,
+repository does not exist or may require 'docker login'
+```
+
+`gf180-waferspace-harden` is a **local** image tag — it is built on your machine from
+`docker/Dockerfile.harden`, and lives on no public registry. When the image hasn't been built
+yet, `docker compose run` (used by `make pdk` / `make harden`) tries to **pull** that tag
+instead of building it, and the pull fails with the message above. (`sudo` is unrelated — it
+fails the same way with or without it.)
+
+The fix is simply to build the image first:
+
+```bash
+make build-harden     # one-time: docker compose build harden
+```
+
+Current Makefiles wire this in automatically — `pdk`, `harden`, and the `open-*` targets all
+depend on `build-harden`, so a clean checkout never hits this. If your tree has no
+`build-harden` target, you're on an older copy; `git pull` to update.
+
+> **You should see:** `make build-harden` build (or reuse a cached) `gf180-waferspace-harden`
+> image, after which `make pdk` and `make harden` proceed without the pull error.
 
 ---
 

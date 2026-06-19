@@ -25,7 +25,7 @@ You need just a few things. The whole point of this kit is that you do **not** i
 
 | You need | Why | Notes |
 |---|---|---|
-| **Docker Desktop** | Runs all the chip tools in containers so you install nothing by hand | Windows / macOS / Linux. On Windows, enable the **WSL2** backend. |
+| **Docker** | Runs all the chip tools in containers so you install nothing by hand | Docker Desktop on Windows/macOS (enable the **WSL2** backend on Windows); Docker **Engine** on a headless Linux server. |
 | **WSL2** (Windows only) | Docker's Linux backend; also where `make` runs | Install via `wsl --install` in an admin PowerShell, then reboot. |
 | **git** | To clone this repo | Any recent version. |
 | **Disk space** | Images + PDK + a build run are large | Keep **~30 GB** free. The PDK is ~4 GB; a final GDS can be 100 MB+. |
@@ -38,9 +38,17 @@ Download Docker Desktop from [docker.com](https://www.docker.com/products/docker
 
 - **Windows:** During or after install, make sure the **WSL2 backend** is enabled (Docker Desktop → Settings → General → "Use the WSL 2 based engine"). See Step 1b below to install WSL2 itself.
 - **macOS:** Install the build that matches your chip (Apple Silicon or Intel). No extra backend setup needed.
-- **Linux:** You can use Docker Desktop, or just Docker Engine from your distro. Either works.
+- **Linux:** Docker Desktop works, but on a **headless server (no GUI)** you do **not** want Desktop — install **Docker Engine** instead, straight from Docker's package repos: <https://docs.docker.com/engine/install/>. Pick your distro on that page.
 
-After installing, start Docker Desktop and wait until it reports it is running.
+After installing, start Docker (Desktop reports when it is running; Engine starts via `sudo systemctl enable --now docker`).
+
+> 🐧 **Linux post-install — do this or you'll be stuck typing `sudo` (and breaking file ownership).** By default only `root` can talk to the Docker daemon, so plain `docker`/`make` commands fail with a *permission denied* error and `sudo make ...` looks like the fix. **It isn't** — running the containers as root makes every file they write into the repo and PDK volume root-owned, which causes confusing failures later. Instead, add yourself to the `docker` group once, then **log out and back in**:
+>
+> ```bash
+> sudo usermod -aG docker $USER
+> ```
+>
+> Full official steps (including rootless mode): <https://docs.docker.com/engine/install/linux-postinstall/>. After re-logging in, `docker run hello-world` should work **without** `sudo`.
 
 ```bash
 docker --version
