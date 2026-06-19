@@ -148,16 +148,33 @@ independent set of checks on your GDS, separate from LibreLane's signoff. Run it
 [gf180mcu-precheck](https://github.com/wafer-space/gf180mcu-precheck).
 
 LibreLane's signoff (DRC / LVS / antenna, see `04_HARDENING_GUIDE.md`) is necessary, but
-the precheck is the gate wafer.space expects you to pass *before* submitting. Run it on
+the precheck is the gate wafer.space expects you to pass *before* submitting. Point it at
 your hardened GDS:
 
 ```bash
-# point the precheck at your hardened GDS
-# (see the gf180mcu-precheck README for the exact invocation)
-final/gds/chip_top.gds
+# from the gf180mcu-precheck checkout, after entering its nix-shell and
+# exporting the PDK variables (see that repo's README)
+python3 precheck.py --input final/gds/chip_top.gds --slot 1x0p5 --cob
 ```
 
+Pass the **same `--slot`** you hardened with (`1x0p5` is this kit's default; the precheck
+itself defaults to `1x1`, so always set it explicitly). The precheck also **renders the
+layout** to an image so you can eyeball the result.
+
 Fix anything the precheck flags, then re-harden and re-run until it is clean.
+
+### The `--cob` pad-mask check (chip-on-board)
+
+precheck **1.7.0** added a pad-mask check, enabled with `--cob`. It compares your pad layer
+against a **golden mask** for the selected slot and confirms the layout is compatible with
+the default **CoB (chip-on-board)** padring — i.e. the north/south bond pads land exactly
+where the CoB package expects them. (This pairs with project template **1.5.3**, which fixed
+a padring-script regression that had nudged the north/south bond pads 0.5 µm off-center.)
+
+> ⚠️ **The pad-mask check will soon be activated on the wafer.space submission platform.**
+> Until then, run the precheck locally with `--cob` to confirm a CoB-compatible layout
+> before you submit. If you re-hardened with an older template, re-harden on **1.5.3+** so
+> the pads are aligned again.
 
 > ℹ️ **Confirm on wafer.space / gf180mcu-precheck:** the exact precheck invocation and any
 > wafer.space-specific options for the current shuttle. Follow the precheck repository's
@@ -176,7 +193,8 @@ Before you submit, confirm **all** of these:
 - [ ] **Hold timing is clean** (0 violations). (Setup may be negative — acceptable for a
       low-frequency design; see `04_HARDENING_GUIDE.md`.)
 - [ ] `final/gds/chip_top.gds` **exists** and you can open it in KLayout.
-- [ ] The **`gf180mcu-precheck`** passes on your GDS (the template's terminal gate).
+- [ ] The **`gf180mcu-precheck`** passes on your GDS (the template's terminal gate),
+      including the **`--cob` pad-mask check** for your slot.
 - [ ] Required tapeout IP cells are present (`qrcode_id`, `shuttle_id`, `project_id`,
       `marker`).
 - [ ] You have a logical-signal → physical-ball pinout table built from the bond-out sheet.

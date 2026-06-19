@@ -51,7 +51,7 @@ make pdk
 ```
 
 > **You should see:** `ciel` (the PDK manager) downloading the **gf180mcuD** PDK, pinned at
-> commit `f6bfbd4d3d23c4236ff1f36126489ee59aa35cbd`, about **4 GB**. This is a one-time
+> commit `019cf7a3e0de79bb0e4b6213758882d283c65816`, about **4 GB**. This is a one-time
 > download — it lands in a PDK cache (`./gf180mcu`) and is reused by every harden. If the
 > download times out mid-stream, just run `make pdk` again; a retry usually completes
 > cleanly.

@@ -11,7 +11,7 @@ TOP = chip_top
 # and a local ./pdk dir for Path B / native use.
 PDK_ROOT ?= $(MAKEFILE_DIR)/pdk
 PDK ?= gf180mcuD
-PDK_COMMIT ?= f6bfbd4d3d23c4236ff1f36126489ee59aa35cbd
+PDK_COMMIT ?= 019cf7a3e0de79bb0e4b6213758882d283c65816
 
 # ---- Standard-cell library (SCL) --------------------------------------------
 # Available: gf180mcu_fd_sc_mcu7t5v0 (default), gf180mcu_fd_sc_mcu9t5v0,

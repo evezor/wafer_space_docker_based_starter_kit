@@ -141,7 +141,7 @@ Read these in order. Each builds on the one before.
 
 Want the upstream, fully-featured version this kit is built on? The [wafer.space project template](https://github.com/wafer-space/gf180mcu-project-template) is the canonical GF180MCU tapeout template (Nix-based). This kit adds the Docker path, the beginner docs, and a known-green example core. [`docs/03_CONTINUE_THE_DESIGN.md`](docs/03_CONTINUE_THE_DESIGN.md) points to the parts of the upstream template worth reading.
 
-Before you submit a real design to a shuttle, you run a **precheck** — an automated set of checks that catches common submission problems early. The wafer.space precheck lives at [gf180mcu-precheck](https://github.com/wafer-space/gf180mcu-precheck); [`docs/05_WAFERSPACE_SUBMISSION.md`](docs/05_WAFERSPACE_SUBMISSION.md) walks you through running it.
+Before you submit a real design to a shuttle, you run a **precheck** — an automated set of checks that catches common submission problems early. The wafer.space precheck lives at [gf180mcu-precheck](https://github.com/wafer-space/gf180mcu-precheck); [`docs/05_WAFERSPACE_SUBMISSION.md`](docs/05_WAFERSPACE_SUBMISSION.md) walks you through running it. Run it with the `--cob` flag to verify your pad layer matches the chip-on-board padring for your slot — this check will soon be enforced on the submission platform.
 
 ---
 

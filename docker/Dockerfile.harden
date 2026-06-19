@@ -16,7 +16,7 @@
 #        `librelane --version`.
 #   Pin a SPECIFIC tag (not `latest`) for reproducibility once confirmed, ideally
 #   matching the Nix-pinned librelane rev in flake.lock (the template pins
-#   librelane rev 531569a251c493a91905b4596e494c29da99dd0b on the `dev` branch).
+#   librelane rev 3131cc551528fb4b06ce30aa7219a2a3718c333e on the `dev` branch).
 ARG LIBRELANE_IMAGE=ghcr.io/librelane/librelane:latest   # <VERIFY: tag>
 FROM ${LIBRELANE_IMAGE}
 
