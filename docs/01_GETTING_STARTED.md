@@ -28,6 +28,7 @@ You need just a few things. The whole point of this kit is that you do **not** i
 | **Docker** | Runs all the chip tools in containers so you install nothing by hand | Docker Desktop on Windows/macOS (enable the **WSL2** backend on Windows); Docker **Engine** on a headless Linux server. |
 | **WSL2** (Windows only) | Docker's Linux backend; also where `make` runs | Install via `wsl --install` in an admin PowerShell, then reboot. |
 | **git** | To clone this repo | Any recent version. |
+| **make** | The front door — every command in this kit is `make <target>` | Preinstalled on most Linux/WSL and macOS. If missing: Linux/WSL `sudo apt-get install -y make`; macOS `xcode-select --install`. On Windows, run `make` from inside WSL, not PowerShell. |
 | **Disk space** | Images + PDK + a build run are large | Keep **~30 GB** free. The PDK is ~4 GB; a final GDS can be 100 MB+. |
 
 ---

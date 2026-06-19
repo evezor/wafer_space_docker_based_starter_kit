@@ -14,6 +14,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.sim
     image: gf180-waferspace-sim          # local tag, built on demand
+    pull_policy: build                   # build this local tag; never try to pull it
     working_dir: /work
     volumes:
       - .:/work                          # the repo, live-mounted
@@ -38,6 +39,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.harden
     image: gf180-waferspace-harden
+    pull_policy: build                   # build this local tag; never try to pull it
     working_dir: /work
     volumes:
       - .:/work                          # the repo, live-mounted
