@@ -32,6 +32,21 @@
 `define gf180mcu_xxx_io__asig_5p0 gf180mcu_fd_io__asig_5p0
 `endif
 
+// In the foundry I/O pads the core and I/O supplies are a single 5 V net, and the
+// gf180mcu_fd_io power/ground cells drop the opposite core rail (the dvss ground
+// pad has no VSS pin, the dvdd power pad no VDD pin). Keeping VSS/DVSS (and
+// VDD/DVDD) as separate nets makes OpenROAD.PadRing's connect_by_abutment resolve
+// the same ring rail to two nets and abort with [PAD-0002]. So for the foundry
+// pads, wire the D-rails of every pad to the core VDD/VSS nets — one ground, one
+// power, all the way around the ring. The ocd_io path keeps its split supplies.
+`ifdef PAD_gf180mcu_fd_io
+`define PADRING_DVDD VDD
+`define PADRING_DVSS VSS
+`else
+`define PADRING_DVDD DVDD
+`define PADRING_DVSS DVSS
+`endif
+
 module chip_top #(
     // Power/ground pads for I/O
     parameter NUM_DVDD_PADS = `NUM_DVDD_PADS,
@@ -93,8 +108,8 @@ module chip_top #(
         (* keep *)
         `gf180mcu_xxx_io__dvdd pad (
             `ifdef USE_POWER_PINS
-            .DVDD   (DVDD),
-            .DVSS   (DVSS),
+            .DVDD   (`PADRING_DVDD),
+            .DVSS   (`PADRING_DVSS),
             .VDD    (VDD),
             .VSS    (VSS)
             `endif
@@ -104,8 +119,8 @@ module chip_top #(
         (* keep *)
         `gf180mcu_xxx_io__dvss pad (
             `ifdef USE_POWER_PINS
-            .DVDD   (DVDD),
-            .DVSS   (DVSS),
+            .DVDD   (`PADRING_DVDD),
+            .DVSS   (`PADRING_DVSS),
             .VDD    (VDD),
             .VSS    (VSS)
             `endif
@@ -115,8 +130,8 @@ module chip_top #(
         (* keep *)
         `gf180mcu_xxx_io__vdd pad (
             `ifdef USE_POWER_PINS
-            .DVDD   (DVDD),
-            .DVSS   (DVSS),
+            .DVDD   (`PADRING_DVDD),
+            .DVSS   (`PADRING_DVSS),
             .VDD    (VDD),
             .VSS    (VSS)
             `endif
@@ -126,8 +141,8 @@ module chip_top #(
         (* keep *)
         `gf180mcu_xxx_io__vss pad (
             `ifdef USE_POWER_PINS
-            .DVDD   (DVDD),
-            .DVSS   (DVSS),
+            .DVDD   (`PADRING_DVDD),
+            .DVSS   (`PADRING_DVSS),
             .VDD    (VDD),
             .VSS    (VSS)
             `endif
@@ -140,8 +155,8 @@ module chip_top #(
     // Schmitt trigger
     `gf180mcu_xxx_io__in_s clk_pad (
         `ifdef USE_POWER_PINS
-        .DVDD   (DVDD),
-        .DVSS   (DVSS),
+        .DVDD   (`PADRING_DVDD),
+        .DVSS   (`PADRING_DVSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
@@ -156,8 +171,8 @@ module chip_top #(
     // Normal input
     `gf180mcu_xxx_io__in_c rst_n_pad (
         `ifdef USE_POWER_PINS
-        .DVDD   (DVDD),
-        .DVSS   (DVSS),
+        .DVDD   (`PADRING_DVDD),
+        .DVSS   (`PADRING_DVSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
@@ -174,8 +189,8 @@ module chip_top #(
         (* keep *)
         `gf180mcu_xxx_io__in_c pad (
             `ifdef USE_POWER_PINS
-            .DVDD   (DVDD),
-            .DVSS   (DVSS),
+            .DVDD   (`PADRING_DVDD),
+            .DVSS   (`PADRING_DVSS),
             .VDD    (VDD),
             .VSS    (VSS),
             `endif
@@ -194,8 +209,8 @@ module chip_top #(
         (* keep *)
         `gf180mcu_xxx_io__bi_24t pad (
             `ifdef USE_POWER_PINS
-            .DVDD   (DVDD),
-            .DVSS   (DVSS),
+            .DVDD   (`PADRING_DVDD),
+            .DVSS   (`PADRING_DVSS),
             .VDD    (VDD),
             .VSS    (VSS),
             `endif
@@ -220,8 +235,8 @@ module chip_top #(
         (* keep *)
         `gf180mcu_xxx_io__asig_5p0 pad (
             `ifdef USE_POWER_PINS
-            .DVDD   (DVDD),
-            .DVSS   (DVSS),
+            .DVDD   (`PADRING_DVDD),
+            .DVSS   (`PADRING_DVSS),
             .VDD    (VDD),
             .VSS    (VSS),
             `endif
