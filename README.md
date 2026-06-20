@@ -47,15 +47,17 @@ This is the hero section. Copy each block exactly. The goal is to get from "noth
 
 
 #### # 0. Install Docker Desktop and git first 
-see [`docs/01_GETTING_STARTED.md`](docs/01_GETTING_STARTED.md) 
+If you don't have them already installed, see [`docs/01_GETTING_STARTED.md`](docs/01_GETTING_STARTED.md) 
 
-### # 1. Get the code.
+#### # 1. Get the code.
 ```bash
+# 1. Get the code
 git clone https://github.com/evezor/wafer_space_docker_based_starter_kit.git
 cd wafer_space_docker_based_starter_kit
 ```
 #### # 2. Build the simulation image (one-time; a few minutes).
 ```bash
+# 2. Build the simulation image
 make build-sim
 ```
 
@@ -63,6 +65,7 @@ make build-sim
 
 #### # 3. Simulate the example chip. This is the moment of truth.
 ```bash
+# 3. Simulate the example chip.
 make sim
 ```
 
@@ -75,6 +78,7 @@ make sim
 #### # 4. (Optional, heavier) Fetch the PDK and produce a real layout.
 
 ```bash
+# 4. Fetch the PDK and produce a real layout
 make pdk        # multi-GB, one-time download via `ciel`
 make harden     # RTL -> GDSII for the default slot (this takes a while)
 ```
