@@ -1,4 +1,4 @@
-# 02 · The Flow
+# 04 · The Flow
 
 This page explains the end-to-end pipeline one stage at a time, so that at any moment you know *where you are* and *what you are trying to prove*. If [`00_ASIC_FOR_BEGINNERS.md`](00_ASIC_FOR_BEGINNERS.md) taught you the words, this page shows you how they connect.
 
@@ -49,7 +49,7 @@ Simulating proves your design *does something*; verifying proves it does the *ri
 OK: scaffold chip_core matched golden
 ```
 
-That is 256 out of 256 samples matched, with zero mismatches. This golden-model habit is the single most important thing to carry into your own design — see [`03_CONTINUE_THE_DESIGN.md`](03_CONTINUE_THE_DESIGN.md) for how to add your own reference model and test.
+That is 256 out of 256 samples matched, with zero mismatches. This golden-model habit is the single most important thing to carry into your own design — see [`06_CONTINUE_THE_DESIGN.md`](06_CONTINUE_THE_DESIGN.md) for how to add your own reference model and test.
 
 ## Stage 4 — Harden
 
@@ -61,7 +61,7 @@ Once a layout exists, the tools run the **signoff** checks that decide whether i
 
 ## Stage 6 — GDSII deliverable → submission
 
-When signoff is clean, your final layout is at `final/gds/chip_top.gds`. That single file is the deliverable: it is what wafer.space turns into silicon. Before submitting you run a precheck and assemble the bond-out and tapeout-IP details — all covered in [`05_WAFERSPACE_SUBMISSION.md`](05_WAFERSPACE_SUBMISSION.md).
+When signoff is clean, your final layout is at `final/gds/chip_top.gds`. That single file is the deliverable: it is what wafer.space turns into silicon. Before submitting you run a precheck and assemble the bond-out and tapeout-IP details — all covered in [`02_WAFERSPACE_SUBMISSION.md`](02_WAFERSPACE_SUBMISSION.md).
 
 ---
 
@@ -93,11 +93,13 @@ Use this table as a cheat-sheet for "what do I touch and what do I run, at each 
 
 ## Where to go next
 
-- Ready to make it yours? Go to [`03_CONTINUE_THE_DESIGN.md`](03_CONTINUE_THE_DESIGN.md).
-- Want the deep dive on hardening (Path A Docker vs Path B Nix, and reading every report)? Go to [`04_HARDENING_GUIDE.md`](04_HARDENING_GUIDE.md).
+- Ready to make it yours? Go to [`06_CONTINUE_THE_DESIGN.md`](06_CONTINUE_THE_DESIGN.md).
+- Want to see exactly how the shipped example is built and verified, file by file? See [`05_ANATOMY_OF_THE_SAMPLE.md`](05_ANATOMY_OF_THE_SAMPLE.md).
+- Wondering how this kit compares to other routes onto a wafer.space shuttle? See [`03_PATHS_TO_A_WAFERSPACE_DIE.md`](03_PATHS_TO_A_WAFERSPACE_DIE.md).
+- Want the deep dive on hardening (Path A Docker vs Path B Nix, and reading every report)? Go to [`07_HARDENING_GUIDE.md`](07_HARDENING_GUIDE.md).
 
 ---
 
 | ◀ Previous | Up | Next ▶ |
 | :--- | :---: | ---: |
-| [01 · Getting Started](01_GETTING_STARTED.md) | [Documentation map](../README.md#documentation-map) | [03 · Continue the Design](03_CONTINUE_THE_DESIGN.md) |
+| [03 · Paths to a wafer.space Die](03_PATHS_TO_A_WAFERSPACE_DIE.md) | [Documentation map](../README.md#documentation-map) | [05 · Anatomy of the Sample](05_ANATOMY_OF_THE_SAMPLE.md) |

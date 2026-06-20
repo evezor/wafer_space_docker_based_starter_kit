@@ -56,7 +56,7 @@ Before a layout can be manufactured, it must pass a set of automated **signoff**
 | **Density** | Each layer has enough (but not too much) metal, as the factory requires for even, reliable manufacturing. |
 | **PDN / power-grid** | The power and ground mesh actually reaches every cell, so the whole chip is powered. |
 
-> A clean result on all of these — every count is **0** — is what "manufacturable" means. The example chip in this kit passes all of them, and so will your design if you follow [`04_HARDENING_GUIDE.md`](04_HARDENING_GUIDE.md).
+> A clean result on all of these — every count is **0** — is what "manufacturable" means. The example chip in this kit passes all of them, and so will your design if you follow [`07_HARDENING_GUIDE.md`](07_HARDENING_GUIDE.md).
 
 ## What is a tapeout? A shuttle? wafer.space?
 
@@ -64,7 +64,7 @@ A **tapeout** is the moment you finalize the GDSII and hand it off to be made. T
 
 A **shuttle** (also called a **multi-project wafer**, or MPW) is a single manufacturing run shared by many small designs. Instead of paying for an entire wafer yourself, you share one with many other designers and pay only for your slice. That is what makes a custom chip affordable for a hobbyist.
 
-**wafer.space** is a service that runs GF180MCU shuttles for hobbyists and small teams. You submit your GDSII for a **slot** of a given size. This kit targets the `1x0p5` (half) slot by default — the full slot menu and submission details are in [`05_WAFERSPACE_SUBMISSION.md`](05_WAFERSPACE_SUBMISSION.md).
+**wafer.space** is a service that runs GF180MCU shuttles for hobbyists and small teams. You submit your GDSII for a **slot** of a given size. This kit targets the `1x0p5` (half) slot by default — the full slot menu and submission details are in [`02_WAFERSPACE_SUBMISSION.md`](02_WAFERSPACE_SUBMISSION.md).
 
 > ℹ️ **Confirm on wafer.space:** the exact submission portal URL, the accepted submission format, and the current shuttle deadline. These live on the wafer.space site, not in this repo.
 

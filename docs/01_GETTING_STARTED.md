@@ -1,6 +1,6 @@
 # 01 · Getting Started
 
-This page takes you from "nothing installed" to a **green example simulation** — proof that the whole kit works on your machine — and then, optionally, to your **first real chip layout**. Every step has a success signal so you always know whether it worked.
+This page takes you from "nothing installed" to a **green example simulation** — proof that the whole kit works on your machine — and then to your **first real chip layout**, the GDSII you submit in the next chapter. Every step has a success signal so you always know whether it worked.
 
 > New to the words *PDK*, *RTL*, *GDSII*, *shuttle*? Read [`00_ASIC_FOR_BEGINNERS.md`](00_ASIC_FOR_BEGINNERS.md) first. It is a quick, tool-free primer.
 
@@ -8,14 +8,14 @@ This page takes you from "nothing installed" to a **green example simulation** �
 
 ## What you'll achieve
 
-By the end of this page you will have simulated a real (tiny) chip design on your own machine and seen it pass its self-check. The simulation part takes about **10 minutes** and a few GB of disk. The optional hardening part (making an actual layout) downloads several more GB and runs for a while — do that once the simulation is green.
+By the end of this page you will have simulated a real (tiny) chip design on your own machine, seen it pass its self-check, and hardened it into a manufacturable layout. The simulation part takes about **10 minutes** and a few GB of disk. The hardening part (making the actual layout you submit) downloads several more GB and runs for a while — do it once the simulation is green.
 
 | Part | Roughly how long | What you get |
 |---|---|---|
 | Install Docker + git | 10–20 min (one-time) | The tools that run everything |
 | Clone + build sim image | ~5 min (one-time) | A container with Icarus + Python + cocotb |
 | Run the example sim | seconds | **A green light: the kit works** |
-| (Optional) Fetch PDK + harden | 30 min – a few hours | A clean, manufacturable GDSII |
+| Fetch PDK + harden the sample | 30 min – a few hours | A clean, manufacturable GDSII — ready to submit |
 
 ---
 
@@ -123,7 +123,7 @@ make sim
 > ```
 > This is the green light. **If this passes, your environment is correct.** (`make test` is an alias for `make sim` and does exactly the same thing.)
 
-> 💾 The run also drops a waveform at `chip_core.vcd` in the repo root. Because the repo is mounted into the container, that file is already on your real filesystem — open it directly in GTKWave. For why your outputs are never trapped in the container (and the one thing that *isn't* on your host), see [`04_HARDENING_GUIDE.md`](04_HARDENING_GUIDE.md#getting-your-files-out-of-the-container).
+> 💾 The run also drops a waveform at `chip_core.vcd` in the repo root. Because the repo is mounted into the container, that file is already on your real filesystem — open it directly in GTKWave. For why your outputs are never trapped in the container (and the one thing that *isn't* on your host), see [`07_HARDENING_GUIDE.md`](07_HARDENING_GUIDE.md#getting-your-files-out-of-the-container).
 
 ---
 
@@ -133,11 +133,11 @@ make sim
 - `make sim` printed the `OK: scaffold chip_core matched golden` banner and exited 0.
 - You did **not** need to install Verilog, Python, or any EDA tool directly.
 
-If `make sim` failed, jump to [`06_TROUBLESHOOTING.md`](06_TROUBLESHOOTING.md). The most common first-run issue on Windows is the path-mount one (the sim wrapper sets `MSYS_NO_PATHCONV=1` to fix Docker mangling mount paths under Git Bash).
+If `make sim` failed, jump to [`08_TROUBLESHOOTING.md`](08_TROUBLESHOOTING.md). The most common first-run issue on Windows is the path-mount one (the sim wrapper sets `MSYS_NO_PATHCONV=1` to fix Docker mangling mount paths under Git Bash).
 
 ---
 
-## Step 6 (optional) — Fetch the PDK
+## Step 6 — Fetch the PDK
 
 Everything up to here needed **no PDK**. To make an actual layout you first download the GF180MCU PDK. This is a multi-GB, one-time download.
 
@@ -149,15 +149,15 @@ make pdk
 
 ---
 
-## Step 7 (optional) — Your first harden
+## Step 7 — Harden the sample
 
-Now turn the example RTL into a real layout for the default `1x0p5` slot.
+Now turn the example RTL into a real layout for the default `1x0p5` slot. This produces the GDSII you'll submit in the next chapter — a clean, manufacturable layout of the sample chip.
 
 ```bash
 make harden
 ```
 
-> **You should see:** the full RTL→GDSII flow run (synthesis, place, route, signoff — this can take a while, and synthesis on a big design can take much longer than on this tiny example). On success a layout appears at `final/gds/chip_top.gds` and the manufacturability report reads `Antenna Passed`, `LVS Passed`, `DRC Passed`. The full walkthrough of this step — including the advanced Nix path (`make harden-nix`) and how to read every report — is [`04_HARDENING_GUIDE.md`](04_HARDENING_GUIDE.md).
+> **You should see:** the full RTL→GDSII flow run (synthesis, place, route, signoff — this can take a while, and synthesis on a big design can take much longer than on this tiny example). On success a layout appears at `final/gds/chip_top.gds` and the manufacturability report reads `Antenna Passed`, `LVS Passed`, `DRC Passed`. The full walkthrough of this step — including the advanced Nix path (`make harden-nix`) and how to read every report — is [`07_HARDENING_GUIDE.md`](07_HARDENING_GUIDE.md).
 
 > ℹ️ **A note on patience:** big downloads and synthesis runs are normal and can look like a hang when they are not. The PDK is ~4 GB and a full Nix toolchain closure is ~7 GB; synthesis on large designs can take *hours* (the example takes only minutes). If a step seems stuck, give it time before assuming it failed.
 
@@ -165,11 +165,12 @@ make harden
 
 ## Where to go next
 
-- To understand the whole pipeline you just ran, read [`02_THE_FLOW.md`](02_THE_FLOW.md).
-- When you are ready to replace the example with your own design, read [`03_CONTINUE_THE_DESIGN.md`](03_CONTINUE_THE_DESIGN.md).
+- **You now have a submittable chip.** Take the hardened sample to a wafer.space shuttle: [`02_WAFERSPACE_SUBMISSION.md`](02_WAFERSPACE_SUBMISSION.md).
+- For the bigger picture — how this kit fits among the ways to get a die onto a wafer.space shuttle — see [`03_PATHS_TO_A_WAFERSPACE_DIE.md`](03_PATHS_TO_A_WAFERSPACE_DIE.md).
+- To understand the pipeline you just ran, read [`04_THE_FLOW.md`](04_THE_FLOW.md); when you're ready to design your own, [`06_CONTINUE_THE_DESIGN.md`](06_CONTINUE_THE_DESIGN.md).
 
 ---
 
 | ◀ Previous | Up | Next ▶ |
 | :--- | :---: | ---: |
-| [00 · ASIC for Beginners](00_ASIC_FOR_BEGINNERS.md) | [Documentation map](../README.md#documentation-map) | [02 · The Flow](02_THE_FLOW.md) |
+| [00 · ASIC for Beginners](00_ASIC_FOR_BEGINNERS.md) | [Documentation map](../README.md#documentation-map) | [02 · wafer.space Submission](02_WAFERSPACE_SUBMISSION.md) |

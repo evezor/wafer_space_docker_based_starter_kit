@@ -1,4 +1,4 @@
-# 06 — Troubleshooting
+# 08 — Troubleshooting
 
 Real problems and their fixes, drawn from a proven GF180MCU build-and-harden run. Each
 entry is in **symptom → cause → fix** form so a stuck beginner can self-rescue.
@@ -23,11 +23,11 @@ hit them. If nothing matches, jump to "Still stuck?" at the bottom.
 | 2 | In the Nix harden container, `ps` / `pgrep` report only "1 process" even though a flow is clearly running | `procps`'s `ps` and `pgrep` are broken in the `nixos/nix` container | **Don't trust `ps` for liveness.** Enumerate `/proc` directly (see the command block below). A live flow shows a `python3 …librelane…` process plus an `openroad` or `yosys` child. **Never `rm -rf` a run before confirming via `/proc` that it is dead.** |
 | 3 | Hardening crashes at the KLayout antenna/LVS step with a Ruby `NoMethodError` on `nil.strip` (with `pmap: command not found` printed just above it) | `pmap` (from `procps`) is **missing**; the PDK's KLayout decks call `pmap` for memory logging, get back empty output, then call `.strip` on `nil` and crash | **Path A (Docker):** `docker/Dockerfile.harden` now bakes in a `pmap` shim — rebuild with **`make build-harden`**, then re-run `make harden` (or resume with `--last-run --from KLayout.Antenna`). **Path B (Nix):** **`nix profile install nixpkgs#procps`** (also un-breaks `ps`/`pgrep`, #2), then resume `--from KLayout.Antenna`. |
 | 4 | Hardening fails early with `[PDN-1030] Unable to find instance i_chip_core.sram_0` | The design has **no SRAM**, but a power-delivery (PDN) or macros config still references SRAM grids | If your design has no SRAM, **do not reference SRAM anywhere** in the hardening config: no SRAM macro block or `PDN_MACRO_CONNECTIONS` in `librelane/macros/*.yaml`, and `librelane/pdn/pdn_cfg.tcl` must **not** `source` the SRAM PDN file. **The scaffold ships clean of this** — only relevant if you add or remove SRAM. |
-| 5 | Setup timing won't close at 25 MHz (negative WNS) for logic with a long path | A wide multiplexer or deep combinational path is simply longer than the 40 ns clock period | **Run the chip slower.** A setup violation means "lower the clock," which is fine for a low-frequency design. Confirm **hold is clean (0)** — that is the un-fixable-post-fab failure mode. Closing 25 MHz is an architecture change (pipeline the path, or use an SRAM macro), not a re-run knob. See `04_HARDENING_GUIDE.md`. |
+| 5 | Setup timing won't close at 25 MHz (negative WNS) for logic with a long path | A wide multiplexer or deep combinational path is simply longer than the 40 ns clock period | **Run the chip slower.** A setup violation means "lower the clock," which is fine for a low-frequency design. Confirm **hold is clean (0)** — that is the un-fixable-post-fab failure mode. Closing 25 MHz is an architecture change (pipeline the path, or use an SRAM macro), not a re-run knob. See `07_HARDENING_GUIDE.md`. |
 | 6 | Synthesis seems to hang for a very long time | Large flop arrays synthesize slowly — a 16 Kbit memory built from flip-flops can take **hours** of synthesis | **Be patient** for big designs; the trivial scaffold is fast. To speed your own: shrink large memories or back them with an SRAM macro. You can **resume** a flow past synthesis with `--last-run --from <Step>` instead of re-running it. |
 | 7 | `git` is huge / the repo bloats after a harden | The final GDS is **~100 MB+** for a dense design; a full run's output can reach ~1 GB | Keep `final/` and `librelane/runs/` **gitignored** (the scaffold's `.gitignore` already does). Never commit the GDS. |
 | 8 | `make pdk` times out partway through | A transient network failure on a multi-GB download | Just **re-run `make pdk`** — a retry usually completes cleanly. The PDK is ~4 GB; the Nix closure (Path B) is ~7.4 GB. Plan for the download time. |
-| 9 | A testbench "passes" but you don't trust it | The pass condition might be trivially true (it can never fail) | Make the check **strict**: compare **N > 0** samples against a golden vector and require **0 mismatches**. Never loosen a self-checking testbench just to make it pass. See `03_CONTINUE_THE_DESIGN.md`. |
+| 9 | A testbench "passes" but you don't trust it | The pass condition might be trivially true (it can never fail) | Make the check **strict**: compare **N > 0** samples against a golden vector and require **0 mismatches**. Never loosen a self-checking testbench just to make it pass. See `06_CONTINUE_THE_DESIGN.md`. |
 | 10 | KLayout / OpenROAD GUI won't open on Windows | No X server is available for the container's GUI | Run an X server (e.g. VcXsrv or WSLg) and point `DISPLAY` at it, or open the GDS in a locally installed copy of KLayout. See the note below. |
 | 11 | On **Linux**, `make build-sim` (or any `docker`/`make` command) fails with `permission denied` on `/var/run/docker.sock`, and `sudo make ...` "fixes" it | Your user is **not in the `docker` group**, so only root can reach the Docker daemon | Add yourself to the group instead of using sudo: **`sudo usermod -aG docker $USER`**, then **log out and back in**. Don't keep using `sudo` — it makes container-written files root-owned. See the note below. |
 | 12 | `make pdk` / `make harden` fails with **`pull access denied for gf180-waferspace-harden, repository does not exist or may require 'docker login'`** | The local hardening image was never built, and `docker compose run` tries to **pull** the local-only tag rather than build it | Build it first: **`make build-harden`** (one-time), then re-run. Current Makefiles do this automatically via a `build-harden` dependency — if you don't have that target, `git pull` to update. See the note below. |
@@ -178,7 +178,7 @@ mentions SRAM:
 > without the `PDN-1030` error.
 
 If you *do* add SRAM, you must wire the macro into both the macros YAML and the PDN — see
-`03_CONTINUE_THE_DESIGN.md` for the "add new RTL" rules.
+`06_CONTINUE_THE_DESIGN.md` for the "add new RTL" rules.
 
 ---
 
@@ -201,7 +201,7 @@ long run does not look like a hang:
 ## Timing issues (#5)
 
 If setup timing won't close at 25 MHz, that is usually fine — see #5 in the table and the
-full explanation in `04_HARDENING_GUIDE.md`. The short version:
+full explanation in `07_HARDENING_GUIDE.md`. The short version:
 
 - **Setup** violations mean "run the chip slower." Acceptable for a low-frequency design.
 - **Hold** violations are **not** acceptable — they cannot be fixed after fabrication, so
@@ -214,7 +214,7 @@ full explanation in `04_HARDENING_GUIDE.md`. The short version:
 If a testbench passes but you don't trust it, the pass condition is probably too weak. Make
 it strict: compare **more than zero** samples against a committed golden vector and require
 **0 mismatches**. A test you can cheat is worse than no test. The recommended
-golden-model pattern is in `03_CONTINUE_THE_DESIGN.md`.
+golden-model pattern is in `06_CONTINUE_THE_DESIGN.md`.
 
 ---
 
@@ -237,7 +237,7 @@ a display.
 - **LibreLane documentation** — the flow's own reference:
   <https://librelane.readthedocs.io>
 - **wafer.space** — the community and site for shuttle-specific questions (submission
-  format, slots, bond-out sheets). See `05_WAFERSPACE_SUBMISSION.md`.
+  format, slots, bond-out sheets). See `02_WAFERSPACE_SUBMISSION.md`.
 - **The upstream template** — a known-good reference tree to diff your repo against:
   <https://github.com/wafer-space/gf180mcu-project-template>
 
@@ -248,4 +248,4 @@ local edit that drifted away from the proven baseline.
 
 | ◀ Previous | Up | Next ▶ |
 | :--- | :---: | ---: |
-| [05 · wafer.space Submission](05_WAFERSPACE_SUBMISSION.md) | [Documentation map](../README.md#documentation-map) | [Back to the README](../README.md) |
+| [07 · Hardening Guide](07_HARDENING_GUIDE.md) | [Documentation map](../README.md#documentation-map) | [Back to the README](../README.md) |

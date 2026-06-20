@@ -1,4 +1,4 @@
-# 05 — wafer.space Submission
+# 02 — wafer.space Submission
 
 You have a clean GDSII. This page bridges from "I hardened clean" to "I submitted my chip
 to a wafer.space shuttle": the slot sizes and area budgets, the bond-out concept (how your
@@ -34,9 +34,10 @@ returns physical dies (with optional chip-on-board packaging or full undiced-waf
 
 ## Where this fits
 
-You are at the last stage. Your simulation is green, you have run `make harden` for your
-slot, and `manufacturability.rpt` reads all `Passed` (see `04_HARDENING_GUIDE.md`). Now you
-package and submit.
+In Getting Started your simulation went green and you ran `make harden` for your slot, so
+`manufacturability.rpt` reads all `Passed` (the deep hardening walkthrough is in
+`07_HARDENING_GUIDE.md`). That hardened GDSII is the whole technical artifact — even the
+*unmodified sample* is enough to walk a submission end to end. Now you package and submit.
 
 A **shuttle** is a shared manufacturing run: wafer.space produces a **multi-project wafer
 (MPW)** where many independent chips share one wafer, each occupying a fixed rectangular
@@ -80,13 +81,13 @@ for the seal ring, pad ring, and corner cells.
 > **Pad categories are soft; only the per-slot total is hard.** Bidir pads are
 > direction-configurable, so for the default `1x0p5` you have about **54 assignable signal
 > pads** regardless of how the table splits them into "input" vs "bidir." (See
-> `03_CONTINUE_THE_DESIGN.md` for the soft-budget rule and how to assign functions to
+> `06_CONTINUE_THE_DESIGN.md` for the soft-budget rule and how to assign functions to
 > pads.)
 
 So pick your slot by the two things that are genuinely fixed: **core area** (how much logic
 fits) and **total signal pads**. The default `1x0p5` is a good first choice — wide, short,
 and proven. To change slot, harden with `SLOT=<name> make harden` (see
-`04_HARDENING_GUIDE.md`); you never edit pad counts by hand.
+`07_HARDENING_GUIDE.md`); you never edit pad counts by hand.
 
 ---
 
@@ -123,7 +124,7 @@ these:**
 - `marker`
 
 The `logo` cell is **optional** and may be removed. These cells (and the seal ring) are a
-large part of why you leave `chip_top.sv` alone — see `03_CONTINUE_THE_DESIGN.md`.
+large part of why you leave `chip_top.sv` alone — see `06_CONTINUE_THE_DESIGN.md`.
 
 > ℹ️ **Confirm on wafer.space:** how your *per-project* QR/ID cells are issued at
 > registration. The kit ships generic-but-valid versions so the scaffold hardens out of the
@@ -147,7 +148,7 @@ The wafer.space template's own final step is the **manufacturability precheck** 
 independent set of checks on your GDS, separate from LibreLane's signoff. Run it with
 [gf180mcu-precheck](https://github.com/wafer-space/gf180mcu-precheck).
 
-LibreLane's signoff (DRC / LVS / antenna, see `04_HARDENING_GUIDE.md`) is necessary, but
+LibreLane's signoff (DRC / LVS / antenna, see `07_HARDENING_GUIDE.md`) is necessary, but
 the precheck is the gate wafer.space expects you to pass *before* submitting. Point it at
 your hardened GDS:
 
@@ -191,7 +192,7 @@ Before you submit, confirm **all** of these:
 - [ ] `manufacturability.rpt` reads **Antenna Passed / LVS Passed / DRC Passed**.
 - [ ] In `metrics.json`, the DRC / LVS / antenna / density / PDN counts are **all 0**.
 - [ ] **Hold timing is clean** (0 violations). (Setup may be negative — acceptable for a
-      low-frequency design; see `04_HARDENING_GUIDE.md`.)
+      low-frequency design; see `07_HARDENING_GUIDE.md`.)
 - [ ] `final/gds/chip_top.gds` **exists** and you can open it in KLayout.
 - [ ] The **`gf180mcu-precheck`** passes on your GDS (the template's terminal gate),
       including the **`--cob` pad-mask check** for your slot.
@@ -221,10 +222,10 @@ Once you have submitted a clean, precheck-passing GDS for the correct slot, your
 complete. **Fabrication, packaging, delivery, and bringing up the physical chip on a board
 are handled by wafer.space and the foundry, and are beyond this kit's scope.**
 
-If you get stuck anywhere along the way, see `06_TROUBLESHOOTING.md`.
+If you get stuck anywhere along the way, see `08_TROUBLESHOOTING.md`.
 
 ---
 
 | ◀ Previous | Up | Next ▶ |
 | :--- | :---: | ---: |
-| [04 · Hardening Guide](04_HARDENING_GUIDE.md) | [Documentation map](../README.md#documentation-map) | [06 · Troubleshooting](06_TROUBLESHOOTING.md) |
+| [01 · Getting Started](01_GETTING_STARTED.md) | [Documentation map](../README.md#documentation-map) | [03 · Paths to a wafer.space Die](03_PATHS_TO_A_WAFERSPACE_DIE.md) |

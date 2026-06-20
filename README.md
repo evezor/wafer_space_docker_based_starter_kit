@@ -66,9 +66,9 @@ make pdk        # fetch the GF180MCU PDK (multi-GB, one-time)
 make harden     # RTL → GDSII for the default slot (takes a while)
 ```
 
-> ✅ A clean layout lands at `final/gds/chip_top.gds` with `Antenna / LVS / DRC Passed`. Full walkthrough → [`docs/04_HARDENING_GUIDE.md`](docs/04_HARDENING_GUIDE.md).
+> ✅ A clean layout lands at `final/gds/chip_top.gds` with `Antenna / LVS / DRC Passed`. Full walkthrough → [`docs/07_HARDENING_GUIDE.md`](docs/07_HARDENING_GUIDE.md).
 
-You just ran the same pipeline a real tapeout uses — RTL → simulate → verify → harden → signoff — so the only new variable when you swap in your own design is the design itself. The pipeline explained stage by stage → [`docs/02_THE_FLOW.md`](docs/02_THE_FLOW.md).
+You just ran the same pipeline a real tapeout uses — RTL → simulate → verify → harden → signoff — so the only new variable when you swap in your own design is the design itself. The pipeline explained stage by stage → [`docs/04_THE_FLOW.md`](docs/04_THE_FLOW.md).
 
 ---
 
@@ -105,31 +105,33 @@ wafer_space_docker_based_starter_kit/
 └── docs/                      # all the guides (see the documentation map below)
 ```
 
-> ℹ️ The **one file you edit** is `src/chip_core.sv`. Everything in `src/chip_top.sv` (the pad ring and tapeout IP) is do-not-edit — touching it can break the layout. See [`docs/03_CONTINUE_THE_DESIGN.md`](docs/03_CONTINUE_THE_DESIGN.md) for the full "make it yours" guide.
+> ℹ️ The **one file you edit** is `src/chip_core.sv`. Everything in `src/chip_top.sv` (the pad ring and tapeout IP) is do-not-edit — touching it can break the layout. See [`docs/06_CONTINUE_THE_DESIGN.md`](docs/06_CONTINUE_THE_DESIGN.md) for the full "make it yours" guide.
 
 ---
 
 ## Documentation map
 
-Read these in order. Each builds on the one before.
+These run from concepts, to a submitted sample, to designing your own — read in order.
 
 | Read in this order | Doc | What's in it |
 |---|---|---|
 | 1 | [`docs/00_ASIC_FOR_BEGINNERS.md`](docs/00_ASIC_FOR_BEGINNERS.md) | Plain-English concepts: PDK, RTL, GDSII, DRC/LVS, tapeout. No tools. |
-| 2 | [`docs/01_GETTING_STARTED.md`](docs/01_GETTING_STARTED.md) | Install prerequisites, clone, get the sim green, optional first harden. |
-| 3 | [`docs/02_THE_FLOW.md`](docs/02_THE_FLOW.md) | The full pipeline stage by stage, with a diagram and file/command map. |
-| 4 | [`docs/03_CONTINUE_THE_DESIGN.md`](docs/03_CONTINUE_THE_DESIGN.md) | **The "how to make it yours" guide** — edit `chip_core.sv`, add tests, grow. |
-| 5 | [`docs/04_HARDENING_GUIDE.md`](docs/04_HARDENING_GUIDE.md) | Path A (Docker) vs Path B (Nix), exact harden commands, reading results, getting your files out of the container. |
-| 6 | [`docs/05_WAFERSPACE_SUBMISSION.md`](docs/05_WAFERSPACE_SUBMISSION.md) | Slot sizes, pinout/bond-out, tapeout cells, seal ring, submission checklist. |
-| 7 | [`docs/06_TROUBLESHOOTING.md`](docs/06_TROUBLESHOOTING.md) | Real problems and fixes from a proven run. |
+| 2 | [`docs/01_GETTING_STARTED.md`](docs/01_GETTING_STARTED.md) | Install prerequisites, clone, get the sim green, and harden the sample. |
+| 3 | [`docs/02_WAFERSPACE_SUBMISSION.md`](docs/02_WAFERSPACE_SUBMISSION.md) | Submit the hardened sample: slot sizes, pinout/bond-out, tapeout cells, precheck, checklist. |
+| 4 | [`docs/03_PATHS_TO_A_WAFERSPACE_DIE.md`](docs/03_PATHS_TO_A_WAFERSPACE_DIE.md) | Orientation — what wafer.space is, the direct vs hosted paths onto a shuttle, what every die needs. |
+| 5 | [`docs/04_THE_FLOW.md`](docs/04_THE_FLOW.md) | The full pipeline stage by stage, with a diagram and file/command map. |
+| 6 | [`docs/05_ANATOMY_OF_THE_SAMPLE.md`](docs/05_ANATOMY_OF_THE_SAMPLE.md) | A file-by-file anatomy of the shipped example: what it does and exactly where each behavior and its golden-model check live. |
+| 7 | [`docs/06_CONTINUE_THE_DESIGN.md`](docs/06_CONTINUE_THE_DESIGN.md) | **The "how to make it yours" guide** — edit `chip_core.sv`, add tests, grow. |
+| 8 | [`docs/07_HARDENING_GUIDE.md`](docs/07_HARDENING_GUIDE.md) | Path A (Docker) vs Path B (Nix), exact harden commands, reading results, getting your files out of the container. |
+| 9 | [`docs/08_TROUBLESHOOTING.md`](docs/08_TROUBLESHOOTING.md) | Real problems and fixes from a proven run. |
 
 ---
 
 ## Going further
 
-Want the upstream, fully-featured version this kit is built on? The [wafer.space project template](https://github.com/wafer-space/gf180mcu-project-template) is the canonical GF180MCU tapeout template (Nix-based). This kit adds the Docker path, the beginner docs, and a known-green example core. [`docs/03_CONTINUE_THE_DESIGN.md`](docs/03_CONTINUE_THE_DESIGN.md) points to the parts of the upstream template worth reading.
+Want the upstream, fully-featured version this kit is built on? The [wafer.space project template](https://github.com/wafer-space/gf180mcu-project-template) is the canonical GF180MCU tapeout template (Nix-based). This kit adds the Docker path, the beginner docs, and a known-green example core. [`docs/06_CONTINUE_THE_DESIGN.md`](docs/06_CONTINUE_THE_DESIGN.md) points to the parts of the upstream template worth reading.
 
-Before you submit a real design to a shuttle, you run a **precheck** — an automated set of checks that catches common submission problems early. The wafer.space precheck lives at [gf180mcu-precheck](https://github.com/wafer-space/gf180mcu-precheck); [`docs/05_WAFERSPACE_SUBMISSION.md`](docs/05_WAFERSPACE_SUBMISSION.md) walks you through running it. Run it with the `--cob` flag to verify your pad layer matches the chip-on-board padring for your slot — this check will soon be enforced on the submission platform.
+Before you submit a real design to a shuttle, you run a **precheck** — an automated set of checks that catches common submission problems early. The wafer.space precheck lives at [gf180mcu-precheck](https://github.com/wafer-space/gf180mcu-precheck); [`docs/02_WAFERSPACE_SUBMISSION.md`](docs/02_WAFERSPACE_SUBMISSION.md) walks you through running it. Run it with the `--cob` flag to verify your pad layer matches the chip-on-board padring for your slot — this check will soon be enforced on the submission platform.
 
 ---
 

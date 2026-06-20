@@ -23,7 +23,7 @@ FROM ${LIBRELANE_IMAGE}
 # The GF180MCU PDK's KLayout decks (DRC / LVS / antenna) shell out to `pmap` purely
 # to log memory usage. The official LibreLane image does NOT ship procps, so `pmap`
 # is missing and the deck crashes with `undefined method 'strip' for nil` at the
-# Antenna/LVS step (see docs/06_TROUBLESHOOTING.md #3). Rather than depend on a
+# Antenna/LVS step (see docs/08_TROUBLESHOOTING.md #3). Rather than depend on a
 # package manager that may not exist in this Nix-built image, bake in a tiny,
 # self-contained `pmap` shim that prints a pmap-compatible "total <KB>K" line so the
 # decks log memory instead of dying. The shim reads VmSize from /proc/<pid>/status.

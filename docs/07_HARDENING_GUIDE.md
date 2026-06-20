@@ -1,4 +1,4 @@
-# 04 — Hardening Guide
+# 07 — Hardening Guide
 
 This is the complete reference for turning your RTL into a manufacturable layout. It
 covers both ways to run the flow, the exact commands, what to expect in time and disk, how
@@ -19,7 +19,7 @@ The kit uses **LibreLane**, an open-source RTL-to-GDSII flow.
 
 > **Rule: never harden a design whose simulation is not green.** Hardening can take from
 > tens of minutes to several hours. Catch logic bugs in the fast simulation loop first
-> (see `03_CONTINUE_THE_DESIGN.md`). Harden only on green.
+> (see `06_CONTINUE_THE_DESIGN.md`). Harden only on green.
 
 ---
 
@@ -126,7 +126,7 @@ build.
 | Memory | Multi-GB; the static-timing (STA) and place-and-route (PnR) steps are the heaviest. |
 | Final GDS size | **~100 MB+** for a dense design (the reference build was ~112 MB; the scaffold is far smaller). Keep `final/` **gitignored**. |
 
-> A long synthesis is **not** a hang. If a run seems stuck, see `06_TROUBLESHOOTING.md`
+> A long synthesis is **not** a hang. If a run seems stuck, see `08_TROUBLESHOOTING.md`
 > (symptom #6) before killing it — large flop arrays simply take a long time.
 
 ---
@@ -233,7 +233,7 @@ make open-openroad   # opens the design in OpenROAD (interactive inspection)
 > ℹ️ **Note (Windows):** the GUI tools run inside a container and need a display. On
 > Windows you will need an X server (e.g. VcXsrv or WSLg) with `DISPLAY` pointed at it, or
 > you can open `final/gds/chip_top.gds` in a locally installed copy of KLayout. See
-> `06_TROUBLESHOOTING.md` (symptom #10).
+> `08_TROUBLESHOOTING.md` (symptom #10).
 
 ---
 
@@ -305,7 +305,7 @@ Either redirect it under `/work`, or run an interactive container *without* `--r
 > download — may come out **root-owned** (the container runs as root unless you have set up
 > the docker group). If you later cannot read or `make clean` them, fix ownership with
 > `sudo chown -R $USER:$USER .`. The root cause and the proper one-time fix (the `docker`
-> group) are in `06_TROUBLESHOOTING.md`, #11.
+> group) are in `08_TROUBLESHOOTING.md`, #11.
 
 ---
 
@@ -330,7 +330,7 @@ with an SRAM macro), not a re-run knob. The trivial scaffold closes timing comfo
 25 MHz.
 
 When you check your run, make sure **hold is 0** even if setup is negative. The
-pre-submission checklist in `05_WAFERSPACE_SUBMISSION.md` calls this out explicitly.
+pre-submission checklist in `02_WAFERSPACE_SUBMISSION.md` calls this out explicitly.
 
 ---
 
@@ -339,15 +339,15 @@ pre-submission checklist in `05_WAFERSPACE_SUBMISSION.md` calls this out explici
 Hardening surfaces a handful of recurring, well-understood problems — Windows mount paths,
 process-liveness inside the Nix container, a missing `pmap`, stray SRAM references, long
 synthesis, big GDS files, and PDK download timeouts. Each has a known fix in
-`06_TROUBLESHOOTING.md`. Check there before you assume the flow is broken.
+`08_TROUBLESHOOTING.md`. Check there before you assume the flow is broken.
 
 ---
 
-**Next:** `05_WAFERSPACE_SUBMISSION.md` — go from a clean GDSII to a submitted shuttle
+**Next:** `02_WAFERSPACE_SUBMISSION.md` — go from a clean GDSII to a submitted shuttle
 entry.
 
 ---
 
 | ◀ Previous | Up | Next ▶ |
 | :--- | :---: | ---: |
-| [03 · Continue the Design](03_CONTINUE_THE_DESIGN.md) | [Documentation map](../README.md#documentation-map) | [05 · wafer.space Submission](05_WAFERSPACE_SUBMISSION.md) |
+| [06 · Continue the Design](06_CONTINUE_THE_DESIGN.md) | [Documentation map](../README.md#documentation-map) | [08 · Troubleshooting](08_TROUBLESHOOTING.md) |

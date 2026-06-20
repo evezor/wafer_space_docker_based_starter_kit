@@ -1,4 +1,4 @@
-# 03 — Continue the Design
+# 06 — Continue the Design
 
 You have a green simulation and (maybe) a clean GDSII from the scaffold. Now you make
 the chip *yours*. This page is the "where do I look / how do I keep going" guide: exactly
@@ -24,6 +24,10 @@ contract. The rule is simple:
 
 > **Change your core. Leave the top alone.**
 
+> 🔎 Want to see exactly how the shipped example is wired — what each line does and where
+> its golden-model check lives — before you start changing it? Read
+> [`05_ANATOMY_OF_THE_SAMPLE.md`](05_ANATOMY_OF_THE_SAMPLE.md) first.
+
 ---
 
 ## The one file you edit: `src/chip_core.sv`
@@ -43,7 +47,7 @@ plumbing between the silicon pads and your core. Specifically, do not:
   slot YAML files (`librelane/slots/slot_*.yaml`) reference these blocks by instance path
   to place pads. Rename one and the harden breaks.
 - Remove the required **tapeout IP cells** (more on these in
-  `05_WAFERSPACE_SUBMISSION.md`): `qrcode_id`, `shuttle_id`, `project_id`, and `marker`.
+  `02_WAFERSPACE_SUBMISSION.md`): `qrcode_id`, `shuttle_id`, `project_id`, and `marker`.
   The `logo` cell is decorative and may be removed.
 
 The only legitimate reasons to edit `chip_top.sv` are (a) you change which slot you
@@ -122,7 +126,7 @@ module chip_core #(
 
 The scaffold's `chip_core.sv` already matches this and is **SRAM-free** (it contains no
 on-chip RAM macros). Do not add SRAM macros unless you also wire them into
-`librelane/macros/*.yaml` and the power-delivery network; see `06_TROUBLESHOOTING.md`
+`librelane/macros/*.yaml` and the power-delivery network; see `08_TROUBLESHOOTING.md`
 (symptom #4) for why a stray SRAM reference breaks the harden.
 
 ---
@@ -204,7 +208,7 @@ So if your design needs ten control inputs, put a few on the input pads and rout
 onto bidir pads configured as inputs. Assign functions to whatever pads are convenient —
 just stay within the total.
 
-(For the full per-slot numbers, see `05_WAFERSPACE_SUBMISSION.md`.)
+(For the full per-slot numbers, see `02_WAFERSPACE_SUBMISSION.md`.)
 
 ---
 
@@ -277,7 +281,7 @@ register it in **two** places:
    all).
 
 Then re-run `make sim`, and **only once it is green**, run `make harden`. The full
-hardening walkthrough is in `04_HARDENING_GUIDE.md`.
+hardening walkthrough is in `07_HARDENING_GUIDE.md`.
 
 ---
 
@@ -364,14 +368,14 @@ production setup, read it in this order:
 When your design is ready, run it through
 [gf180mcu-precheck](https://github.com/wafer-space/gf180mcu-precheck) before submitting.
 The precheck is wafer.space's independent manufacturability gate — see
-`05_WAFERSPACE_SUBMISSION.md`.
+`02_WAFERSPACE_SUBMISSION.md`.
 
 ---
 
-**Next:** `04_HARDENING_GUIDE.md` — turn your green RTL into a manufacturable GDSII.
+**Next:** `07_HARDENING_GUIDE.md` — turn your green RTL into a manufacturable GDSII.
 
 ---
 
 | ◀ Previous | Up | Next ▶ |
 | :--- | :---: | ---: |
-| [02 · The Flow](02_THE_FLOW.md) | [Documentation map](../README.md#documentation-map) | [04 · Hardening Guide](04_HARDENING_GUIDE.md) |
+| [05 · Anatomy of the Sample](05_ANATOMY_OF_THE_SAMPLE.md) | [Documentation map](../README.md#documentation-map) | [07 · Hardening Guide](07_HARDENING_GUIDE.md) |
