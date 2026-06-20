@@ -45,21 +45,24 @@ You. Specifically: someone who has **never made a chip before** and wants to. Yo
 
 This is the hero section. Copy each block exactly. The goal is to get from "nothing" to a **green simulation** — proof the whole kit works on your machine.
 
-```bash
-# 0. Install Docker Desktop and git first (see docs/01_GETTING_STARTED.md).
 
-# 1. Get the code.
+#### # 0. Install Docker Desktop and git first 
+see [`docs/01_GETTING_STARTED.md`](docs/01_GETTING_STARTED.md) 
+
+### # 1. Get the code.
+```bash
 git clone https://github.com/evezor/wafer_space_docker_based_starter_kit.git
 cd wafer_space_docker_based_starter_kit
-
-# 2. Build the simulation image (one-time; a few minutes).
+```
+#### # 2. Build the simulation image (one-time; a few minutes).
+```bash
 make build-sim
 ```
 
 > **You should see:** Docker pulling a base image and installing Icarus Verilog, Python, and cocotb, finishing with the local image tagged `gf180-waferspace-sim`. Re-running this is instant once it is cached.
 
+#### # 3. Simulate the example chip. This is the moment of truth.
 ```bash
-# 3. Simulate the example chip. This is the moment of truth.
 make sim
 ```
 
@@ -69,9 +72,9 @@ make sim
 > OK: scaffold chip_core matched golden
 > ```
 > That means the example chip's logic is correct in simulation. **If you got here, the kit works on your machine.**
+#### # 4. (Optional, heavier) Fetch the PDK and produce a real layout.
 
 ```bash
-# 4. (Optional, heavier) Fetch the PDK and produce a real layout.
 make pdk        # multi-GB, one-time download via `ciel`
 make harden     # RTL -> GDSII for the default slot (this takes a while)
 ```
