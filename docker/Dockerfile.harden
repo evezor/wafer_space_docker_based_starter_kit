@@ -20,5 +20,33 @@ FROM ${LIBRELANE_IMAGE}
 # it, uncomment:
 # RUN pip3 install --no-cache-dir ciel
 
+# The GF180MCU PDK's KLayout decks (DRC / LVS / antenna) shell out to `pmap` purely
+# to log memory usage. The official LibreLane image does NOT ship procps, so `pmap`
+# is missing and the deck crashes with `undefined method 'strip' for nil` at the
+# Antenna/LVS step (see docs/06_TROUBLESHOOTING.md #3). Rather than depend on a
+# package manager that may not exist in this Nix-built image, bake in a tiny,
+# self-contained `pmap` shim that prints a pmap-compatible "total <KB>K" line so the
+# decks log memory instead of dying. The shim reads VmSize from /proc/<pid>/status.
+RUN set -eux; \
+    mkdir -p /opt/pmap-shim; \
+    printf '%s\n' \
+      '#!/bin/sh' \
+      '# Minimal pmap shim (procps is absent from the LibreLane image). Used only by' \
+      '# the PDK KLayout decks for memory logging; emits a pmap-style total line.' \
+      'pid=""; for a in "$@"; do case "$a" in -*) : ;; *) pid="$a" ;; esac; done' \
+      'kb=0' \
+      'if [ -n "$pid" ] && [ -r "/proc/$pid/status" ]; then' \
+      '  while read -r key val _; do [ "$key" = VmSize: ] && kb="$val"; done < "/proc/$pid/status"' \
+      'fi' \
+      'echo "${pid:-0}:   pmap-shim"' \
+      'echo " total ${kb}K"' \
+      > /opt/pmap-shim/pmap; \
+    chmod 0755 /opt/pmap-shim/pmap; \
+    kbin="$(command -v klayout 2>/dev/null || true)"; \
+    if [ -n "$kbin" ]; then kdir="$(dirname "$kbin")"; [ -w "$kdir" ] && cp /opt/pmap-shim/pmap "$kdir/pmap" || true; fi; \
+    /opt/pmap-shim/pmap 1
+# Put the shim on PATH for every shell the flow spawns (incl. `bash -lc`).
+ENV PATH="/opt/pmap-shim:${PATH}"
+
 WORKDIR /work
 # No CMD: scripts/harden.sh supplies the librelane command at run time.

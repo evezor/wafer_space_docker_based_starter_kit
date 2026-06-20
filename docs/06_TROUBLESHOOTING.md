@@ -21,7 +21,7 @@ hit them. If nothing matches, jump to "Still stuck?" at the bottom.
 |---|---|---|---|
 | 1 | On **Windows**, `make sim` or the Docker wrapper fails with a weird path like `C;/work` or an "invalid mount" error | Git Bash (MSYS) rewrites the `:/work` mount path before passing it to Docker | The wrapper sets **`export MSYS_NO_PATHCONV=1`** before the `docker run` (as the scaffold's `scripts/sim.sh` already does). If you call `docker` by hand, set it yourself. |
 | 2 | In the Nix harden container, `ps` / `pgrep` report only "1 process" even though a flow is clearly running | `procps`'s `ps` and `pgrep` are broken in the `nixos/nix` container | **Don't trust `ps` for liveness.** Enumerate `/proc` directly (see the command block below). A live flow shows a `python3 …librelane…` process plus an `openroad` or `yosys` child. **Never `rm -rf` a run before confirming via `/proc` that it is dead.** |
-| 3 | Hardening crashes at the KLayout antenna/LVS step with a Ruby `NoMethodError` on `nil.strip` | `pmap` (from `procps`) is **missing**; the PDK's KLayout decks call `pmap` for memory logging, get back `""`, then call `nil.strip` and crash | Install it: **`nix profile install nixpkgs#procps`** — this also un-breaks `ps`/`pgrep` (#2). Then resume the flow with `--from KLayout.Antenna`. |
+| 3 | Hardening crashes at the KLayout antenna/LVS step with a Ruby `NoMethodError` on `nil.strip` (with `pmap: command not found` printed just above it) | `pmap` (from `procps`) is **missing**; the PDK's KLayout decks call `pmap` for memory logging, get back empty output, then call `.strip` on `nil` and crash | **Path A (Docker):** `docker/Dockerfile.harden` now bakes in a `pmap` shim — rebuild with **`make build-harden`**, then re-run `make harden` (or resume with `--last-run --from KLayout.Antenna`). **Path B (Nix):** **`nix profile install nixpkgs#procps`** (also un-breaks `ps`/`pgrep`, #2), then resume `--from KLayout.Antenna`. |
 | 4 | Hardening fails early with `[PDN-1030] Unable to find instance i_chip_core.sram_0` | The design has **no SRAM**, but a power-delivery (PDN) or macros config still references SRAM grids | If your design has no SRAM, **do not reference SRAM anywhere** in the hardening config: no SRAM macro block or `PDN_MACRO_CONNECTIONS` in `librelane/macros/*.yaml`, and `librelane/pdn/pdn_cfg.tcl` must **not** `source` the SRAM PDN file. **The scaffold ships clean of this** — only relevant if you add or remove SRAM. |
 | 5 | Setup timing won't close at 25 MHz (negative WNS) for logic with a long path | A wide multiplexer or deep combinational path is simply longer than the 40 ns clock period | **Run the chip slower.** A setup violation means "lower the clock," which is fine for a low-frequency design. Confirm **hold is clean (0)** — that is the un-fixable-post-fab failure mode. Closing 25 MHz is an architecture change (pipeline the path, or use an SRAM macro), not a re-run knob. See `04_HARDENING_GUIDE.md`. |
 | 6 | Synthesis seems to hang for a very long time | Large flop arrays synthesize slowly — a 16 Kbit memory built from flip-flops can take **hours** of synthesis | **Be patient** for big designs; the trivial scaffold is fast. To speed your own: shrink large memories or back them with an SRAM macro. You can **resume** a flow past synthesis with `--last-run --from <Step>` instead of re-running it. |
@@ -129,19 +129,33 @@ for p in /proc/[0-9]*; do tr '\0' ' ' < $p/cmdline; echo; done \
 > actually dead.** Deleting a running flow's directory corrupts the run.
 
 If hardening crashes at the KLayout antenna or LVS step with a Ruby `NoMethodError` on
-`nil.strip` (#3), the cause is a missing `pmap` (a memory-reporting tool from the `procps`
-package that the PDK's KLayout decks call). Install it — which also fixes the `ps`/`pgrep`
+`nil.strip` (#3) — usually with `sh: pmap: command not found` printed just above it — the
+cause is a missing `pmap` (a memory-reporting tool from the `procps` package that the PDK's
+KLayout decks call for logging). The fix depends on which path you hardened with.
+
+**Path A (Docker)** — the default `make harden`. The official LibreLane image ships no
+`pmap` either, so the scaffold's `docker/Dockerfile.harden` bakes in a tiny `pmap` shim. If
+you hit this crash, you're running an image built **before** that fix — rebuild it, then
+re-run:
+
+```bash
+make build-harden     # rebuild the harden image (now with the pmap shim)
+make harden           # re-run (or resume — see below)
+```
+
+**Path B (Nix)** — install `procps` into your profile, which also fixes the `ps`/`pgrep`
 breakage above:
 
 ```bash
 nix profile install nixpkgs#procps
 ```
 
-> **You should see:** `pmap` available on the `PATH`, after which you can resume the flow:
+> **You should see:** `pmap` available on the `PATH`, after which you can resume the flow
+> from the failed step instead of re-running the whole thing — append to the **same**
+> librelane command you ran:
 >
 > ```bash
-> # resume from the failed step instead of re-running the whole flow
-> make harden    # with --from KLayout.Antenna passed through to LibreLane
+> #   ... --save-views-to /work/final  --last-run --from KLayout.Antenna
 > ```
 
 ---
