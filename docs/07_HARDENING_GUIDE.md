@@ -60,7 +60,7 @@ make pdk
 
 ## Step 2A — Harden (Path A, default Docker)
 
-From the repo root. The default slot is `1x0p5`.
+From the repo root. The default slot is `1x1`.
 
 ```bash
 make pdk        # one-time (skip if already done)
@@ -75,7 +75,7 @@ make harden     # RTL -> GDSII via the prebuilt LibreLane Docker image
 To target a different slot, prefix the command with `SLOT=`:
 
 ```bash
-SLOT=1x1 make harden     # harden for the full 1x1 slot instead of the default 1x0p5
+SLOT=1x0p5 make harden   # harden for the half 1x0p5 slot instead of the default 1x1
 ```
 
 `make` auto-runs `make defines` first, so the right per-slot pad-count macros are
@@ -102,7 +102,7 @@ nix develop --accept-flake-config
 Then, **inside that shell**:
 
 ```bash
-SLOT=1x0p5 PDK_ROOT=<your-pdk-path> make harden
+SLOT=1x1 PDK_ROOT=<your-pdk-path> make harden
 ```
 
 > **You should see:** the same ~80-step LibreLane flow as Path A, ending in the same clean

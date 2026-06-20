@@ -64,7 +64,7 @@ A **tapeout** is the moment you finalize the GDSII and hand it off to be made. T
 
 A **shuttle** (also called a **multi-project wafer**, or MPW) is a single manufacturing run shared by many small designs. Instead of paying for an entire wafer yourself, you share one with many other designers and pay only for your slice. That is what makes a custom chip affordable for a hobbyist.
 
-**wafer.space** is a service that runs GF180MCU shuttles for hobbyists and small teams. You submit your GDSII for a **slot** of a given size. This kit targets the `1x0p5` (half) slot by default — the full slot menu and submission details are in [`02_WAFERSPACE_SUBMISSION.md`](02_WAFERSPACE_SUBMISSION.md).
+**wafer.space** is a service that runs GF180MCU shuttles for hobbyists and small teams. You submit your GDSII for a **slot** of a given size. This kit targets the `1x1` (full) slot by default — the full slot menu and submission details are in [`02_WAFERSPACE_SUBMISSION.md`](02_WAFERSPACE_SUBMISSION.md).
 
 > ℹ️ **Confirm on wafer.space:** the exact submission portal URL, the accepted submission format, and the current shuttle deadline. These live on the wafer.space site, not in this repo.
 
@@ -74,7 +74,7 @@ A **shuttle** (also called a **multi-project wafer**, or MPW) is a single manufa
 
 **Pads** are the big metal squares around the edge of the die where the chip connects to the outside world: power, ground, and signals. Thin wires are bonded from these pads to the legs of the chip's package. This kit uses the `gf180mcu_fd_io` pad library, which provides 5 V I/O pads.
 
-Each wafer.space slot gives you a fixed budget of pads. The default `1x0p5` slot, for example, provides **4 input pads, 46 bidirectional ("bidir") pads, and 4 analog pads** (plus power, ground, clock, and reset). A **bidir** pad can act as an input or an output — your design controls which, at runtime.
+Each wafer.space slot gives you a fixed budget of pads. The default `1x1` slot, for example, provides **12 input pads, 40 bidirectional ("bidir") pads, and 2 analog pads** (plus power, ground, clock, and reset). A **bidir** pad can act as an input or an output — your design controls which, at runtime.
 
 ## Digital vs analog — why this kit is digital-only
 

@@ -4,7 +4,7 @@
 # which slot/SRAM it is being built for.
 set -euo pipefail
 
-SLOT=${SLOT:-1x0p5}
+SLOT=${SLOT:-1x1}
 SRAM=${SRAM:-gf180mcu_fd_ip_sram}
 
 # SLOT_1X0P5, SLOT_1X1, ... (uppercased, matches the slot YAMLs' VERILOG_DEFINES)

@@ -18,7 +18,7 @@ pdk      = os.getenv("PDK", "gf180mcuD")
 scl      = os.getenv("SCL", "gf180mcu_fd_sc_mcu7t5v0")
 pad      = os.getenv("PAD", "gf180mcu_fd_io")
 sram     = os.getenv("SRAM", "gf180mcu_fd_ip_sram")
-slot     = os.getenv("SLOT", "1x0p5")          # scaffold default slot
+slot     = os.getenv("SLOT", "1x1")            # scaffold default slot
 
 hdl_toplevel = "chip_top"
 

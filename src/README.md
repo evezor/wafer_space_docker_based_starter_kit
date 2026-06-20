@@ -43,7 +43,7 @@ are the tutorial.
 
 #### Changing slots
 
-Default slot is `1x0p5` (4 input / 46 bidir / 4 analog pads). To target a
+Default slot is `1x1` (12 input / 40 bidir / 2 analog pads). To target a
 different slot, define a different `SLOT_*` macro at build time (see
 `slot_defines.svh` for the options) and update the docs/Makefiles to match.
 You do **not** edit the pad counts by hand.

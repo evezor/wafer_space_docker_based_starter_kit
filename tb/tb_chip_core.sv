@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
-// tb_chip_core: self-checking test for the scaffold chip_core (1x0p5: 4/46/4).
+// tb_chip_core: self-checking test for the scaffold chip_core (1x1: 12/40/2).
 //
-//   - Elaborates chip_core with the real 1x0p5 pad budget, every port connected.
+//   - Elaborates chip_core with the real 1x1 pad budget, every port connected.
 //   - Asserts the bidir direction mask matches the stub's contract
 //     (output bits oe=1, demo-input block [11:8] oe=0, ie = ~oe everywhere).
 //   - Releases reset, gates the counter ON (input pad 0 = 1), and every clock
@@ -18,10 +18,10 @@
 
 module tb_chip_core;
 
-    // ----- pad budget (1x0p5) -----
-    localparam NIN   = 4;
-    localparam NBI   = 46;
-    localparam NAN   = 4;
+    // ----- pad budget (1x1) -----
+    localparam NIN   = 12;
+    localparam NBI   = 40;
+    localparam NAN   = 2;
 
     // ----- scenario constants (mirror models/ref_model.py EXACTLY) -----
     localparam NSAMP = 256;     // counter steps captured

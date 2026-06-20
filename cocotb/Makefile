@@ -4,7 +4,7 @@
 
 SIM      ?= icarus
 TOPLEVEL_LANG ?= verilog
-SLOT     ?= 1x0p5
+SLOT     ?= 1x1
 
 # Run the Python runner directly (it drives both build + test).
 .PHONY: sim

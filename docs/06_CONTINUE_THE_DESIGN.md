@@ -196,12 +196,12 @@ no digital data and no `oe`. Leave them alone unless you have a specific analog 
 
 ## How to assign functions to pads (the soft-budget rule)
 
-The default slot for this kit is `1x0p5`, whose budget is **4 input + 46 bidir + 4
-analog** pads. It is tempting to read "only 4 input pads" as a hard limit. It is not.
+The default slot for this kit is `1x1`, whose budget is **12 input + 40 bidir + 2
+analog** pads. It is tempting to read the input-pad count as a hard limit. It is not.
 
 > **The pad-category split is *soft* — only the per-slot total is hard.** Because bidir
-> pads are direction-configurable, the `1x0p5` slot gives you about **54 assignable signal
-> pads** (≈50 usable for logic; analog separate). A bidir pad set as an input (`oe=0`) is
+> pads are direction-configurable, the `1x1` slot gives you about **52 assignable signal
+> pads** (12 input + 40 bidir; analog separate). A bidir pad set as an input (`oe=0`) is
 > just as good as a dedicated input pad.
 
 So if your design needs ten control inputs, put a few on the input pads and route the rest

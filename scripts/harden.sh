@@ -3,16 +3,16 @@
 # Nix flow (Path B) uses, but inside the prebuilt LibreLane Docker image (which
 # already contains librelane — so NO `nix develop`).
 #
-# Usage:  bash scripts/harden.sh            # uses defaults (SLOT=1x0p5)
-#         SLOT=1x1 bash scripts/harden.sh   # override the slot
+# Usage:  bash scripts/harden.sh             # uses defaults (SLOT=1x1)
+#         SLOT=1x0p5 bash scripts/harden.sh  # override the slot
 set -euo pipefail
 
-# Design knobs (defaults match a gf180mcuD / slot 1x0p5 wafer.space shuttle).
+# Design knobs (defaults match a gf180mcuD / slot 1x1 wafer.space shuttle).
 PDK=${PDK:-gf180mcuD}
 SCL=${SCL:-gf180mcu_fd_sc_mcu7t5v0}
 PAD=${PAD:-gf180mcu_fd_io}
 SRAM=${SRAM:-gf180mcu_fd_ip_sram}
-SLOT=${SLOT:-1x0p5}
+SLOT=${SLOT:-1x1}
 
 # macros_5v.yaml goes with the 5V SRAM; otherwise macros_3v3.yaml.
 if [ "${SRAM}" = "gf180mcu_fd_ip_sram" ]; then MACROS=5v; else MACROS=3v3; fi

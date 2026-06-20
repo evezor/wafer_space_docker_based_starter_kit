@@ -6,9 +6,9 @@ repository*, *what it does*, and *which file (and line) defines each behavior*. 
 when you want to understand the kit deeply enough to start swapping in your own logic with
 confidence — it's the bridge between "I ran it" and "I can change it."
 
-Where the linear tutorial (`00`–`06`) is *how to drive the kit*, this page is *what's
-under the hood*. Some of it points outward (to the PDK, to LibreLane) where the detail
-quickly exceeds this repo — those are good footholds for learning more.
+The other guides are *how to drive the kit*; this page is *what's under the hood* of the
+example you just built. Some of it points outward (to the PDK, to LibreLane) where the
+detail quickly exceeds this repo — those are good footholds for learning more.
 
 If a term is new, it was defined the first time it appeared earlier in the docs.
 
@@ -34,6 +34,11 @@ What it actually does, on silicon:
 That's the entire behavior. Everything below traces each piece back to the file that
 defines it.
 
+<p align="center">
+  <img src="../images/sample_chip_top.png" alt="Rendered chip_top GDS layout of the sample for the 1x1 slot" width="640"><br>
+  <sub><i>The shipped sample, hardened — the <code>chip_top</code> GDS render for the default <code>1x1</code> slot. The ring of cells around the edge is the pad ring and tapeout markers (<code>chip_top.sv</code> — note the QR marker in the top-left corner); the dense rows filling the middle are the heartbeat-counter core (<code>chip_core.sv</code>) placed and routed; the whole die sits inside its seal ring. Everything this page dissects, made physical.</i></sub>
+</p>
+
 ---
 
 ## Where the design lives in the repo
@@ -45,7 +50,7 @@ is a small, focused set. Here is the whole thing on one screen, grouped by job:
 THE DESIGN (the RTL that becomes silicon)
   src/chip_core.sv        ◄── the design: the heartbeat counter        [YOU EDIT]
   src/chip_top.sv             padring + tapeout IP around your core    [do not edit]
-  src/slot_defines.svh        pad budget per slot (1x0p5 = 4/46/4)     [do not edit]
+  src/slot_defines.svh        pad budget per slot (1x1 = 12/40/2)      [do not edit]
 
 THE SPEC + VERIFICATION (proves the design is correct, no PDK needed)
   models/ref_model.py         golden oracle: the expected answer, in Python   [edit to match]
@@ -82,7 +87,7 @@ is the decoder ring — open `src/chip_core.sv` alongside it.
 | Bidir direction mask (`oe`) | `src/chip_core.sv` ~L75–83 | a `for`-generate sets bits `[11:8]` to input (`oe=0`), the rest to output (`oe=1`); then `bidir_ie = ~bidir_oe` |
 | No internal pulls / drive config | `src/chip_core.sv` ~L68–69, L84–87 | `input_pu/pd` and `bidir_cs/sl/pu/pd` all tied to `'0` |
 | Unused inputs tied off | `src/chip_core.sv` ~L100–101 | folded into the `_unused` net so `-Wall` stays quiet |
-| How many pads exist (4/46/4) | `src/slot_defines.svh` ~L33–47 | the `SLOT_1X0P5` block; selected by the `SLOT_*` define `make defines` generates |
+| How many pads exist (12/40/2) | `src/slot_defines.svh` ~L1–13 | the `SLOT_1X1` block; selected by the `SLOT_*` define `make defines` generates |
 
 (Line numbers are approximate — they drift as the file is edited. The comments in
 `chip_core.sv` are the authoritative tour; read it top to bottom once.)

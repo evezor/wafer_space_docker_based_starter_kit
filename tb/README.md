@@ -20,8 +20,8 @@ be clean (no latch / width warnings).
 
 #### What the test does
 
-`tb_chip_core.sv` elaborates `chip_core` with the real 1x0p5 pad budget
-(4 input / 46 bidir / 4 analog pads), checks the bidir direction mask
+`tb_chip_core.sv` elaborates `chip_core` with the real 1x1 pad budget
+(12 input / 40 bidir / 2 analog pads), checks the bidir direction mask
 (outputs oe=1, demo-input block [11:8] oe=0, ie = ~oe), then runs the counter
 and compares the mirrored low 8 bits against `../models/golden.hex` every clock.
 It prints a single OK/FAIL verdict and exits. The DUT is never tweaked to pass —

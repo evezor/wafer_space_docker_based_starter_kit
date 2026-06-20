@@ -47,12 +47,12 @@ A **shuttle** is a shared manufacturing run: wafer.space produces a **multi-proj
 
 ## Slots and area budgets
 
-There are four slot sizes. The kit defaults to `1x0p5`.
+There are four slot sizes. The kit defaults to `1x1`.
 
 | Slot | Input pads | Bidir pads | Analog pads | Notes |
 |---|---:|---:|---:|---|
-| `1x1` | 12 | 40 | 2 | Full slot |
-| **`1x0p5`** (this kit's default) | **4** | **46** | **4** | Half slot — die **3932 × 2531 µm ≈ 9.95 mm²** |
+| **`1x1`** (this kit's default) | **12** | **40** | **2** | Full slot — die **3932 × 5122 µm ≈ 20.14 mm²** |
+| `1x0p5` | 4 | 46 | 4 | Half slot — die 3932 × 2531 µm ≈ 9.95 mm² |
 | `0p5x1` | 4 | 44 | 6 | Tall, narrow |
 | `0p5x0p5` | 4 | 38 | 4 | Quarter slot |
 
@@ -64,29 +64,31 @@ for the seal ring, pad ring, and corner cells.
 | Slot | Die W×H (µm) | Die area | Core W×H (µm) | Core area |
 |---|---|---|---|---|
 | `0p5x0p5` | 1936 × 2531 | 4.90 mm² | 1052 × 1647 | 1.73 mm² |
-| **`1x0p5`** (default) | 3932 × 2531 | **9.95 mm²** | 3048 × 1647 | 5.02 mm² |
+| `1x0p5` | 3932 × 2531 | 9.95 mm² | 3048 × 1647 | 5.02 mm² |
 | `0p5x1` | 1936 × 5122 | 9.92 mm² | 1052 × 4238 | 4.46 mm² |
-| `1x1` | 3932 × 5122 | 20.14 mm² | 3048 × 4238 | 12.92 mm² |
+| **`1x1`** (default) | 3932 × 5122 | **20.14 mm²** | 3048 × 4238 | **12.92 mm²** |
 
-> **Leave area headroom.** The placeable area is the *core*, not the whole die. A proven
-> `1x0p5` run packed ~66,900 standard cells into its 5.02 mm² core at only **~37.5 %
-> utilization**, deliberately leaving room for routing and timing slack. Don't pack a slot
-> near full — to fit more logic, raise the placement density target or step up to a larger
-> slot (`1x1` gives roughly 2.6× the core area of the default `1x0p5`).
+> **Leave area headroom.** The placeable area is the *core*, not the whole die. As an
+> illustration, a proven `1x0p5` run packed ~66,900 standard cells into its 5.02 mm² core
+> at only **~37.5 % utilization**, deliberately leaving room for routing and timing slack.
+> The default `1x1` has a **12.92 mm² core — roughly 2.6× larger** — so the tiny sample
+> fills almost none of it. Don't pack a slot near full; to fit more logic, raise the
+> placement density target (`1x1` is already the largest slot).
 
 ---
 
 ## Choosing your slot (and how it affects pad count)
 
 > **Pad categories are soft; only the per-slot total is hard.** Bidir pads are
-> direction-configurable, so for the default `1x0p5` you have about **54 assignable signal
-> pads** regardless of how the table splits them into "input" vs "bidir." (See
+> direction-configurable, so for the default `1x1` you have about **52 assignable signal
+> pads** (12 input + 40 bidir) regardless of how the table splits them into "input" vs
+> "bidir." (See
 > `06_CONTINUE_THE_DESIGN.md` for the soft-budget rule and how to assign functions to
 > pads.)
 
 So pick your slot by the two things that are genuinely fixed: **core area** (how much logic
-fits) and **total signal pads**. The default `1x0p5` is a good first choice — wide, short,
-and proven. To change slot, harden with `SLOT=<name> make harden` (see
+fits) and **total signal pads**. The default `1x1` is the full slot — the most core area
+and the most signal pads. To change slot, harden with `SLOT=<name> make harden` (see
 `07_HARDENING_GUIDE.md`); you never edit pad counts by hand.
 
 ---
@@ -107,7 +109,7 @@ RTL pad index → physical ball, using the bond-out sheet for your chosen slot:
 | (your signal) | `bidir_PAD[n]` | (from the wafer.space bond-out sheet for your slot) |
 
 > ℹ️ **Confirm on wafer.space:** the bond-out sheet that maps RTL pad indices to physical
-> package balls for your slot (`1x0p5` by default). Translate your logical bus indices to
+> package balls for your slot (`1x1` by default). Translate your logical bus indices to
 > physical balls using that sheet. Do not guess the mapping.
 
 ---
@@ -155,12 +157,12 @@ your hardened GDS:
 ```bash
 # from the gf180mcu-precheck checkout, after entering its nix-shell and
 # exporting the PDK variables (see that repo's README)
-python3 precheck.py --input final/gds/chip_top.gds --slot 1x0p5 --cob
+python3 precheck.py --input final/gds/chip_top.gds --slot 1x1 --cob
 ```
 
-Pass the **same `--slot`** you hardened with (`1x0p5` is this kit's default; the precheck
-itself defaults to `1x1`, so always set it explicitly). The precheck also **renders the
-layout** to an image so you can eyeball the result.
+Pass the **same `--slot`** you hardened with (`1x1` is this kit's default, and also the
+precheck's own default — but always set it explicitly to match the slot you hardened). The
+precheck also **renders the layout** to an image so you can eyeball the result.
 
 Fix anything the precheck flags, then re-harden and re-run until it is clean.
 
@@ -188,7 +190,7 @@ a padring-script regression that had nudged the north/south bond pads 0.5 µm of
 Before you submit, confirm **all** of these:
 
 - [ ] `make sim` is **green** (your self-checking testbench passes, 0 mismatches).
-- [ ] You ran `make harden` for the **correct slot** (`SLOT=1x0p5` by default).
+- [ ] You ran `make harden` for the **correct slot** (`SLOT=1x1` by default).
 - [ ] `manufacturability.rpt` reads **Antenna Passed / LVS Passed / DRC Passed**.
 - [ ] In `metrics.json`, the DRC / LVS / antenna / density / PDN counts are **all 0**.
 - [ ] **Hold timing is clean** (0 violations). (Setup may be negative — acceptable for a

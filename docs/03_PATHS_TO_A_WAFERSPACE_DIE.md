@@ -34,7 +34,7 @@ The routes differ only in **how much of the chip you build yourself.**
 | Padring, power, tapeout IP | **you own it** (ships ready in `chip_top.sv`) | the platform provides it |
 | Who hardens it | **you**, locally (`make harden`: Docker or Nix) | the platform's CI (you push code) |
 | Who submits it | **you** send the GDSII to wafer.space | the platform aggregates many tiles and submits |
-| I/O budget | the full slot (`1x0p5` ≈ 4 input + 46 bidir + 4 analog, ~50 signal pads) | a small fixed bus |
+| I/O budget | the full slot (`1x1` = 12 input + 40 bidir + 2 analog, ~52 signal pads) | a small fixed bus |
 | You get | maximum **control** (area, pads, analog, floorplan, timing) | maximum **convenience** (smallest, cheapest, easiest on-ramp) |
 | Tools to install | Docker (or Nix) | usually none — a browser + GitHub |
 
@@ -94,12 +94,12 @@ like this:
 
 | Hosted wrapper (`tt_um_*`) | This kit (`chip_core`) | Note |
 |---|---|---|
-| `ui_in[7:0]` (dedicated inputs) | `input_in[3:0]` (+ bidir as input) | only 4 input-only pads on `1x0p5`; borrow bidir for more |
+| `ui_in[7:0]` (dedicated inputs) | `input_in[7:0]` | `1x1` has 12 input-only pads — all 8 fit directly |
 | `uo_out[7:0]` (dedicated outputs) | `bidir_out[i]` with `bidir_oe[i]=1` | no output-only pad type — an output is a bidir with `oe=1` |
 | `uio_in/uio_out/uio_oe[7:0]` | `bidir_in/bidir_out/bidir_oe` | same `oe` sense (1=output) — but you also drive `bidir_ie=~oe` and `bidir_pu/pd/cs/sl` |
 | `ena` | *(none)* | no mux — your die is always active; tie to `1` if wrapping a `tt_um` |
 | `clk`, `rst_n` | `clk`, `rst_n` | dedicated pads — identical |
-| *(none)* | `analog[3:0]` | 5 V analog pads you didn't have before |
+| *(none)* | `analog[1:0]` | 5 V analog pads you didn't have before |
 
 Because the buses line up, you can keep a `tt_um_<name>` module unchanged and make
 `chip_core` a thin wrapper around it (instantiate it, tie `ena=1`, add `bidir_ie=~bidir_oe`

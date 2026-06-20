@@ -151,13 +151,18 @@ make pdk
 
 ## Step 7 — Harden the sample
 
-Now turn the example RTL into a real layout for the default `1x0p5` slot. This produces the GDSII you'll submit in the next chapter — a clean, manufacturable layout of the sample chip.
+Now turn the example RTL into a real layout for the default `1x1` slot. This produces the GDSII you'll submit in the next chapter — a clean, manufacturable layout of the sample chip.
 
 ```bash
 make harden
 ```
 
 > **You should see:** the full RTL→GDSII flow run (synthesis, place, route, signoff — this can take a while, and synthesis on a big design can take much longer than on this tiny example). On success a layout appears at `final/gds/chip_top.gds` and the manufacturability report reads `Antenna Passed`, `LVS Passed`, `DRC Passed`. The full walkthrough of this step — including the advanced Nix path (`make harden-nix`) and how to read every report — is [`07_HARDENING_GUIDE.md`](07_HARDENING_GUIDE.md).
+
+<p align="center">
+  <img src="../images/sample_chip_top.png" alt="Rendered chip_top GDS layout of the hardened sample for the 1x1 slot" width="600"><br>
+  <sub><i>What you just made — the <code>chip_top</code> render of the hardened sample for the default <code>1x1</code> slot, also written to <code>final/render/chip_top.png</code>.</i></sub>
+</p>
 
 > ℹ️ **A note on patience:** big downloads and synthesis runs are normal and can look like a hang when they are not. The PDK is ~4 GB and a full Nix toolchain closure is ~7 GB; synthesis on large designs can take *hours* (the example takes only minutes). If a step seems stuck, give it time before assuming it failed.
 

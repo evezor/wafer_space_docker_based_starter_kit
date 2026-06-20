@@ -1,7 +1,7 @@
 # Makefile — the front door. Run `make` (or `make help`) to see everything.
 #
-# Defaults match a wafer.space gf180mcuD shuttle, slot 1x0p5. Override on the
-# command line, e.g.  `make harden SLOT=1x1`.
+# Defaults match a wafer.space gf180mcuD shuttle, slot 1x1. Override on the
+# command line, e.g.  `make harden SLOT=1x0p5`.
 MAKEFILE_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 TOP = chip_top
@@ -33,7 +33,7 @@ endif
 
 # ---- Slot (physical area on the shuttle reticle) ----------------------------
 AVAILABLE_SLOTS = 1x1 0p5x1 1x0p5 0p5x0p5
-DEFAULT_SLOT = 1x0p5
+DEFAULT_SLOT = 1x1
 SLOT ?= $(DEFAULT_SLOT)
 ifeq ($(filter $(SLOT),$(AVAILABLE_SLOTS)),)
     $(error $(SLOT) is not one of AVAILABLE_SLOTS: $(AVAILABLE_SLOTS))
@@ -54,7 +54,7 @@ LIBRELANE_CMD = SRAM_DEFINE=$(SRAM_DEFINE) librelane $(LIBRELANE_CONFIGS) $(LIBR
 .DEFAULT_GOAL := help
 
 help: ## Show this help message
-	@echo 'Usage: make [target] [SLOT=1x0p5 ...]'
+	@echo 'Usage: make [target] [SLOT=1x1 ...]'
 	@echo ''
 	@echo 'Available targets:'
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'

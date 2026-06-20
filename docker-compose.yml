@@ -26,7 +26,7 @@ services:
       SCL:  ${SCL:-gf180mcu_fd_sc_mcu7t5v0}
       PAD:  ${PAD:-gf180mcu_fd_io}
       SRAM: ${SRAM:-gf180mcu_fd_ip_sram}
-      SLOT: ${SLOT:-1x0p5}
+      SLOT: ${SLOT:-1x1}
     # No default command: the Makefile passes the command (e.g. `make sim`).
 
   # ---- Hardening container, PATH A: official prebuilt LibreLane image ----------
@@ -51,5 +51,5 @@ services:
       SCL:  ${SCL:-gf180mcu_fd_sc_mcu7t5v0}
       PAD:  ${PAD:-gf180mcu_fd_io}
       SRAM: ${SRAM:-gf180mcu_fd_ip_sram}
-      SLOT: ${SLOT:-1x0p5}
+      SLOT: ${SLOT:-1x1}
     # No default command: scripts/harden.sh passes the librelane invocation.
