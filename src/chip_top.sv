@@ -39,12 +39,18 @@
 // the same ring rail to two nets and abort with [PAD-0002]. So for the foundry
 // pads, wire the D-rails of every pad to the core VDD/VSS nets — one ground, one
 // power, all the way around the ring. The ocd_io path keeps its split supplies.
-`ifdef PAD_gf180mcu_fd_io
-`define PADRING_DVDD VDD
-`define PADRING_DVSS VSS
-`else
+//
+// Gate on PAD_gf180mcu_ocd_io (the same macro the cell-select block above uses),
+// NOT on PAD_gf180mcu_fd_io: the build never defines PAD_gf180mcu_fd_io, so gating
+// on it falls through to the wrong branch, silently leaves the D-rails on
+// DVDD/DVSS, and re-triggers PAD-0002. The fd path is the `else` default, which is
+// what actually runs here.
+`ifdef PAD_gf180mcu_ocd_io
 `define PADRING_DVDD DVDD
 `define PADRING_DVSS DVSS
+`else
+`define PADRING_DVDD VDD
+`define PADRING_DVSS VSS
 `endif
 
 module chip_top #(
@@ -93,12 +99,16 @@ module chip_top #(
     wire [NUM_BIDIR_PADS-1:0] bidir_CORE2PAD_PU;
     wire [NUM_BIDIR_PADS-1:0] bidir_CORE2PAD_PD;
 
-    // In the foundry pads, the I/O and
-    // core voltage domains are shorted
+    // In the foundry pads the I/O and core supplies are one net: every pad's
+    // D-rails are tied to VDD/VSS (see the PADRING_* defines), so the DVDD/DVSS
+    // top-level ports are vestigial aliases. Drive them from VDD/VSS so they are
+    // not left floating (`assign DVDD = VDD`, not the other way around — cocotb
+    // drives VDD/VSS, so the real nets must be the source). The ocd_io path keeps
+    // independent supplies and skips this.
     `ifdef USE_POWER_PINS
-    `ifdef PAD_gf180mcu_fd_io
-    assign VDD = DVDD;
-    assign VSS = DVSS;
+    `ifndef PAD_gf180mcu_ocd_io
+    assign DVDD = VDD;
+    assign DVSS = VSS;
     `endif
     `endif
 
