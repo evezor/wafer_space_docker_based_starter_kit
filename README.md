@@ -43,51 +43,34 @@ You. Specifically: someone who has **never made a chip before** and wants to. Yo
 
 ## 5-Minute Quickstart
 
-This is the hero section. Copy each block exactly. The goal is to get from "nothing" to a **green simulation** — proof the whole kit works on your machine.
+The fastest path from nothing to a **green simulation** — proof the whole kit works on your machine. This is the short version; for the same steps with a success signal explained at each stage, follow [`docs/01_GETTING_STARTED.md`](docs/01_GETTING_STARTED.md) instead.
 
+**Before you start:** install **Docker Desktop** and **git** (on Windows, also **WSL2**, and run `make` from inside it). Full install instructions → [`docs/01_GETTING_STARTED.md`](docs/01_GETTING_STARTED.md).
 
-#### # 0. Install Docker Desktop and git first 
-If you don't have them already installed, see [`docs/01_GETTING_STARTED.md`](docs/01_GETTING_STARTED.md) 
-
-#### # 1. Get the code.
 ```bash
 # 1. Get the code
 git clone https://github.com/evezor/wafer_space_docker_based_starter_kit.git
 cd wafer_space_docker_based_starter_kit
-```
-#### # 2. Build the simulation image (one-time; a few minutes).
-```bash
-# 2. Build the simulation image
+
+# 2. Build the simulation image (one-time; a few minutes)
 make build-sim
-```
 
-> **You should see:** Docker pulling a base image and installing Icarus Verilog, Python, and cocotb, finishing with the local image tagged `gf180-waferspace-sim`. Re-running this is instant once it is cached.
-
-#### # 3. Simulate the example chip. This is the moment of truth.
-```bash
-# 3. Simulate the example chip.
+# 3. Simulate the example chip — the moment of truth
 make sim
 ```
 
-> **You should see:** a self-checking testbench run and print a clear pass banner, then exit with code 0. The last two lines are:
-> ```
-> ==== 256 samples checked, 0 mismatches ====
-> OK: scaffold chip_core matched golden
-> ```
-> That means the example chip's logic is correct in simulation. **If you got here, the kit works on your machine.**
-#### # 4. (Optional, heavier) Fetch the PDK and produce a real layout.
+> ✅ **Green light:** `make sim` ends with `OK: scaffold chip_core matched golden` and exits 0. **If you got here, the kit works on your machine.**
+
+#### Optional — produce a real layout
 
 ```bash
-# 4. Fetch the PDK and produce a real layout
-make pdk        # multi-GB, one-time download via `ciel`
-make harden     # RTL -> GDSII for the default slot (this takes a while)
+make pdk        # fetch the GF180MCU PDK (multi-GB, one-time)
+make harden     # RTL → GDSII for the default slot (takes a while)
 ```
 
-> **You should see:** `make pdk` download the GF180MCU PDK (about 4 GB — be patient). Then `make harden` runs the full RTL→GDSII flow and produces a final layout at `final/gds/chip_top.gds`. The run's manufacturability report should read `Antenna Passed`, `LVS Passed`, `DRC Passed`. That is a **clean, manufacturable GDSII**. See [`docs/04_HARDENING_GUIDE.md`](docs/04_HARDENING_GUIDE.md) for what every line of output means.
+> ✅ A clean layout lands at `final/gds/chip_top.gds` with `Antenna / LVS / DRC Passed`. Full walkthrough → [`docs/04_HARDENING_GUIDE.md`](docs/04_HARDENING_GUIDE.md).
 
-### What you just did
-
-You ran the same pipeline a real tapeout uses — write RTL → simulate → verify → harden to GDSII → physical signoff. The example proves the pipeline end to end, so that when you swap in your own design, the *only* new variable is your design, not the tooling. The full pipeline is explained stage by stage in [`docs/02_THE_FLOW.md`](docs/02_THE_FLOW.md).
+You just ran the same pipeline a real tapeout uses — RTL → simulate → verify → harden → signoff — so the only new variable when you swap in your own design is the design itself. The pipeline explained stage by stage → [`docs/02_THE_FLOW.md`](docs/02_THE_FLOW.md).
 
 ---
 
