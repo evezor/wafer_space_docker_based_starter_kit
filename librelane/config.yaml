@@ -117,24 +117,16 @@ KLAYOUT_RENDER_OVERSAMPLING: 3
 KLAYOUT_PROPERTIES: dir::gf180mcu_render.lyp
 
 # DRC settings. workers*threads should equal available hardware threads.
-#
-# workers:1 forces KLayout's crash-free Sequential deck runner. Its Parallel
-# runner (workers>1) is broken on KLayout < 0.30.9 — it fails intermittently with
-# "Failed to read result: unexpected token at ''" (KLayout issue #2339). The
-# pinned Path A image (ghcr.io/librelane/librelane:3.1.0.dev1, see
-# docker/Dockerfile.harden) ships KLayout 0.30.7, so workers:max is unsafe there.
-# Decks still run multi-threaded via KLAYOUT_DRC_THREADS, so the cores stay busy.
-# Restore workers:max once the harden image bundles KLayout >= 0.30.9.
-KLAYOUT_DRC_THREADS: 48
+KLAYOUT_DRC_THREADS: 1
 KLAYOUT_DRC_OPTIONS:
   decks: "all,-antenna,-density,-cup" # disable CUP for now
   variant: ref::$PDK
-  workers: 1
+  workers: max
 KLAYOUT_DENSITY_OPTIONS:
   decks: "density"
   variant: ref::$PDK
-  workers: 1
+  workers: max
 KLAYOUT_ANTENNA_OPTIONS:
   decks: "antenna"
   variant: ref::$PDK
-  workers: 1
+  workers: max
