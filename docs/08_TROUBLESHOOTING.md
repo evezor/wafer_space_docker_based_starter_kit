@@ -31,6 +31,7 @@ hit them. If nothing matches, jump to "Still stuck?" at the bottom.
 | 10 | KLayout / OpenROAD GUI won't open on Windows | No X server is available for the container's GUI | Run an X server (e.g. VcXsrv or WSLg) and point `DISPLAY` at it, or open the GDS in a locally installed copy of KLayout. See the note below. |
 | 11 | On **Linux**, `make build-sim` (or any `docker`/`make` command) fails with `permission denied` on `/var/run/docker.sock`, and `sudo make ...` "fixes" it | Your user is **not in the `docker` group**, so only root can reach the Docker daemon | Add yourself to the group instead of using sudo: **`sudo usermod -aG docker $USER`**, then **log out and back in**. Don't keep using `sudo` — it makes container-written files root-owned. See the note below. |
 | 12 | `make pdk` / `make harden` fails with **`pull access denied for gf180-waferspace-harden, repository does not exist or may require 'docker login'`** | The local hardening image was never built, and `docker compose run` tries to **pull** the local-only tag rather than build it | Build it first: **`make build-harden`** (one-time), then re-run. Current Makefiles do this automatically via a `build-harden` dependency — if you don't have that target, `git pull` to update. See the note below. |
+| 13 | After you edit `chip_core.sv`, `make sim` fails to **compile/elaborate** — e.g. `error: ... is not declared`, a port width-mismatch, an inferred-latch warning, or it can't find `generated_defines.svh` | `` `default_nettype none `` turns any undeclared net into an **error** (usually a typo); or a tool was run by hand without `make defines`; or an output bus was driven without a clear-then-set (a latch) | Declare **every** signal; run **`make defines`** before hand-invoked builds (the `make` targets do it for you); drive outputs **clear-then-set** and keep the `oe` mask generate-driven. Full rules: `06_CONTINUE_THE_DESIGN.md` ("Pitfalls to avoid"). |
 
 ---
 
@@ -215,6 +216,28 @@ If a testbench passes but you don't trust it, the pass condition is probably too
 it strict: compare **more than zero** samples against a committed golden vector and require
 **0 mismatches**. A test you can cheat is worse than no test. The recommended
 golden-model pattern is in `06_CONTINUE_THE_DESIGN.md`.
+
+---
+
+## RTL compile / lint errors after editing `chip_core.sv` (#13)
+
+The moment you change `chip_core.sv`, the fast Icarus build (`make sim`) becomes your lint
+gate. Three failures are common the first time — all are *your RTL*, not the kit:
+
+- **`error: <name> is not declared`.** `` `default_nettype none `` is in force, so an
+  undeclared signal is a hard error (not an implicit 1-bit wire). It is almost always a typo
+  or a missing `logic`/`wire` declaration. Declare every net explicitly.
+- **A width mismatch or an inferred *latch* warning.** Usually an output bus driven on only
+  some paths. Drive outputs **clear-then-set**: assign the whole vector to `'0` first, then
+  set the bits you use (and keep the `oe` mask generate-driven). Every bit then has a defined
+  value with no latch.
+- **It can't find `generated_defines.svh` (or a `SLOT_*` macro is undefined).** The RTL
+  `` `include``s a *generated* file. The `make` targets run `make defines` for you; if you
+  invoked `iverilog` by hand, run **`make defines`** first.
+
+> **You should see:** after fixing, `make sim` compiles and runs to the
+> `==== … 0 mismatches ====` / `OK` banner. These rules are spelled out in
+> `06_CONTINUE_THE_DESIGN.md` ("Pitfalls to avoid").
 
 ---
 

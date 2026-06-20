@@ -30,9 +30,9 @@
 module chip_core #(
     // Defaults are placeholders; chip_top always overrides all three explicitly.
     // -g2012 requires a default in the ANSI parameter port list.
-    parameter NUM_INPUT_PADS  = 4,
-    parameter NUM_BIDIR_PADS  = 46,
-    parameter NUM_ANALOG_PADS = 4
+    parameter NUM_INPUT_PADS  = 12,
+    parameter NUM_BIDIR_PADS  = 40,
+    parameter NUM_ANALOG_PADS = 2
 )(
     `ifdef USE_POWER_PINS
     inout  wire VDD,

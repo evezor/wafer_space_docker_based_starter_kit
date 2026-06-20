@@ -37,6 +37,10 @@ world only through the pad contract described below. The shipped version is a ti
 heartbeat counter so the scaffold is green and harden-clean out of the box. You replace
 the body with real logic while keeping the port list and pad-config contract intact.
 
+> 📚 New to SystemVerilog? Skim the learning links in
+> [`00_ASIC_FOR_BEGINNERS.md`](00_ASIC_FOR_BEGINNERS.md) before you start editing — the
+> example is a gentle thing to learn on.
+
 ### What *not* to touch in `chip_top.sv`
 
 `src/chip_top.sv` is a **do-not-edit boundary**. It is copied verbatim from the
@@ -90,9 +94,9 @@ ships, so just keep it):
 module chip_core #(
     // Defaults are placeholders; chip_top always overrides all three explicitly.
     // iverilog -g2012 requires a default in the ANSI parameter port list.
-    parameter NUM_INPUT_PADS  = 4,
-    parameter NUM_BIDIR_PADS  = 46,
-    parameter NUM_ANALOG_PADS = 4
+    parameter NUM_INPUT_PADS  = 12,
+    parameter NUM_BIDIR_PADS  = 40,
+    parameter NUM_ANALOG_PADS = 2
 )(
     `ifdef USE_POWER_PINS
     inout  wire VDD,
@@ -119,7 +123,7 @@ module chip_core #(
 );
 ```
 
-> ℹ️ **Note:** the parameter defaults (`4 / 46 / 4`) are *inert placeholders*. The
+> ℹ️ **Note:** the parameter defaults (`12 / 40 / 2`) are *inert placeholders*. The
 > `iverilog -g2012` SystemVerilog mode rejects an ANSI parameter that has no default, so
 > you must give each one a value — but `chip_top` always overrides all three explicitly
 > with the values for your chosen slot. Do not delete the defaults.
@@ -269,6 +273,28 @@ bash scripts/sim.sh bash -lc \
 
 ---
 
+## A second, optional layer: the pad-level cocotb sim
+
+The fast Icarus loop above tests `chip_core` in isolation. There is a second, **optional**
+harness — `make sim-cocotb` — that elaborates the *whole* `chip_top`: your core **plus** the
+padring and the tapeout IP, driven through the real pad signals from Python (cocotb is a
+Python test framework).
+
+- **What it proves:** that your core is wired correctly *through the pads* — useful after you
+  touch the pad contract or add pins. It is a pad-level **smoke test**; the bit-exact
+  correctness check still lives in the Icarus golden test above.
+- **Cost:** it needs the **PDK** (it pulls in the pad-cell models), so it is slower and is
+  **not** part of the fast inner loop. Run it occasionally, not on every edit.
+
+```bash
+make sim-cocotb     # needs the PDK; elaborates the full chip_top via cocotb
+```
+
+The harness is `cocotb/chip_top_tb.py`; when you add RTL files, register them there too (see
+the outer loop below).
+
+---
+
 ## The outer loop: register new RTL, then harden
 
 As your design grows you will split it across more `.sv` files. When you add a new file,
@@ -345,10 +371,33 @@ keeps your harden clean.
 - **Keep the tapeout IP instances** in `chip_top.sv` (`qrcode_id`, `shuttle_id`,
   `project_id`, `marker`) — they are required for tapeout. Only `logo` is optional.
 - **Give core parameters inert default values.** `iverilog -g2012` rejects an ANSI
-  parameter with no default; the scaffold uses `= 4 / 46 / 4`, and `chip_top` overrides
+  parameter with no default; the scaffold uses `= 12 / 40 / 2`, and `chip_top` overrides
   them anyway.
 - **Build outputs clear-then-set, and keep the `oe` mask generate-driven.** Both idioms
   exist to keep the core latch-free and width-clean.
+
+---
+
+## Productionize: from the sample to *your* registered project
+
+Editing `chip_core.sv` makes the *design* yours; a few repo-level steps make the *project*
+yours, for a real submission:
+
+1. **Fork the kit** (or copy it) and give your project a name — the name you'll register
+   with wafer.space.
+2. **Register your project** with wafer.space (see
+   [`02_WAFERSPACE_SUBMISSION.md`](02_WAFERSPACE_SUBMISSION.md) and the site). Registration is
+   what issues your per-project identity cells — the QR code and the shuttle/project IDs.
+3. **Swap in the issued tapeout IP.** The kit ships *generic placeholder* identity cells so
+   the flow hardens out of the box; before a real tapeout you replace them with the ones
+   wafer.space issues for your registered project/shuttle. Exact steps — which files, which
+   directories, keep the names — are in [`../ip/README.md`](../ip/README.md).
+4. **Leave the rest of `chip_top.sv` alone** — padring, seal ring, and cell placements are
+   already correct for your slot.
+
+Everything else — sim, harden, precheck, submit — is the same loop you already ran on the
+sample. The full submission mechanics are in
+[`02_WAFERSPACE_SUBMISSION.md`](02_WAFERSPACE_SUBMISSION.md).
 
 ---
 

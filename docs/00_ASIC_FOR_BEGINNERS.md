@@ -28,6 +28,13 @@ This kit uses **GF180MCU** — GlobalFoundries' **180 nanometer** process, which
 
 RTL describes **registers** (memory bits that hold a value) and the logic between them. It *looks* like programming, but it is not a sequence of instructions that run one after another. It describes **hardware that all runs at once** — every gate, every wire, simultaneously, on every clock tick. Learning to think "in parallel" instead of "step by step" is the main mental shift of digital design, and the example chip in this kit is small enough to make that shift gently.
 
+> 📚 **Never written Verilog/SystemVerilog?** You'll write your logic in it, so if the language
+> is new, spend an hour with one of these first — they teach the "parallel hardware" mindset
+> with instant feedback: [HDLBits](https://hdlbits.01xz.net/) (interactive Verilog exercises),
+> [nandland](https://nandland.com/) (beginner Verilog/FPGA tutorials), and
+> [ZipCPU's tutorials](https://zipcpu.com/tutorial/). The example chip is deliberately tiny so
+> you can also learn by reading and editing it.
+
 ## The journey of a design
 
 Your RTL goes through a pipeline of automated tools to become a physical layout. Here is each stage in one plain sentence:

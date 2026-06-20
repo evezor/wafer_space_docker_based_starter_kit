@@ -94,6 +94,16 @@ cd wafer_space_docker_based_starter_kit
 
 > 💡 Run `make` with no target at any time to print the list of available commands.
 
+> ⚙️ **Optional — persistent settings via `.env`.** Every knob has a sensible default, so
+> you can skip this. To make a choice *stick* across commands — a different slot, or a shared
+> PDK location — copy the template once:
+> ```bash
+> cp .env.example .env
+> ```
+> docker-compose auto-loads `.env`. For example, set `SLOT=1x0p5` there and every
+> `make harden` targets the half slot without typing `SLOT=…`. A per-command override
+> (`SLOT=1x0p5 make harden`) still works and takes precedence.
+
 ---
 
 ## Step 4 — Build the sim image

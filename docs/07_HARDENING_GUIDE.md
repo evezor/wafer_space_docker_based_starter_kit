@@ -81,6 +81,9 @@ SLOT=1x0p5 make harden   # harden for the half 1x0p5 slot instead of the default
 `make` auto-runs `make defines` first, so the right per-slot pad-count macros are
 generated before the build.
 
+> ⚙️ To make a slot the default for *every* command, set `SLOT=` in `.env` (copy
+> `.env.example` first) instead of prefixing each run. A per-command `SLOT=…` still wins.
+
 ---
 
 ## Step 2B — Harden (Path B, advanced Nix)
