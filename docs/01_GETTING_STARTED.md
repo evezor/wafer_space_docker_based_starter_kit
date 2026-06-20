@@ -43,7 +43,7 @@ Download Docker Desktop from [docker.com](https://www.docker.com/products/docker
 
 After installing, start Docker (Desktop reports when it is running; Engine starts via `sudo systemctl enable --now docker`).
 
-> 🐧 **Linux post-install — do this or you'll be stuck typing `sudo` (and breaking file ownership).** By default only `root` can talk to the Docker daemon, so plain `docker`/`make` commands fail with a *permission denied* error and `sudo make ...` looks like the fix. **It isn't** — running the containers as root makes every file they write into the repo and PDK volume root-owned, which causes confusing failures later. Instead, add yourself to the `docker` group once, then **log out and back in**:
+> 🐧 **Linux post-install — do this or you'll be stuck typing `sudo` (and breaking file ownership).** By default only `root` can talk to the Docker daemon, so plain `docker`/`make` commands fail with a *permission denied* error and `sudo make ...` looks like the fix. **It isn't** — running the containers as root makes every file they write into the repo (including the `./pdk` download) root-owned, which causes confusing failures later. Instead, add yourself to the `docker` group once, then **log out and back in**:
 >
 > ```bash
 > sudo usermod -aG docker $USER
@@ -123,6 +123,8 @@ make sim
 > ```
 > This is the green light. **If this passes, your environment is correct.** (`make test` is an alias for `make sim` and does exactly the same thing.)
 
+> 💾 The run also drops a waveform at `chip_core.vcd` in the repo root. Because the repo is mounted into the container, that file is already on your real filesystem — open it directly in GTKWave. For why your outputs are never trapped in the container (and the one thing that *isn't* on your host), see [`04_HARDENING_GUIDE.md`](04_HARDENING_GUIDE.md#getting-your-files-out-of-the-container).
+
 ---
 
 ## Checkpoint — what success looks like
@@ -143,7 +145,7 @@ Everything up to here needed **no PDK**. To make an actual layout you first down
 make pdk
 ```
 
-> **You should see:** `make pdk` download the GF180MCU PDK (the `gf180mcuD` variant, pinned to commit `f6bfbd4`) via the `ciel` PDK manager into a local PDK store (~4 GB — be patient). If it times out mid-download, just re-run it; it resumes.
+> **You should see:** `make pdk` download the GF180MCU PDK (the `gf180mcuD` variant, pinned to commit `f6bfbd4`) via the `ciel` PDK manager into the `./pdk` folder in your repo (~4 GB — be patient). If it times out mid-download, just re-run it; it resumes.
 
 ---
 

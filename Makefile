@@ -7,8 +7,9 @@ MAKEFILE_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 TOP = chip_top
 
 # ---- PDK selection (gf180mcuD via ciel, pinned commit) ----------------------
-# PDK_ROOT is the named Docker volume mountpoint (/pdk) inside the containers,
-# and a local ./pdk dir for Path B / native use.
+# PDK_ROOT is the host folder bind-mounted to /pdk inside the containers
+# (docker-compose uses ./pdk by default); it doubles as the local PDK dir for
+# Path B / native use.
 PDK_ROOT ?= $(MAKEFILE_DIR)/pdk
 PDK ?= gf180mcuD
 PDK_COMMIT ?= 019cf7a3e0de79bb0e4b6213758882d283c65816
@@ -74,7 +75,7 @@ defines: ## Generate src/generated_defines.svh from the current SLOT/SRAM
 	@printf '`define %s\n' '$(SRAM_DEFINE)' >> src/generated_defines.svh
 .PHONY: defines
 
-pdk: build-harden ## Download the gf180mcuD PDK into the PDK volume (one-time, ~4 GB)
+pdk: build-harden ## Download the gf180mcuD PDK into ./pdk (one-time, ~4 GB)
 	docker compose run --rm harden \
 	    ciel enable $(PDK_COMMIT) --pdk-root /pdk --pdk-family $(PDK) --include-libraries all
 .PHONY: pdk
@@ -111,7 +112,7 @@ open-openroad: build-harden ## Open the most recent hardening run in OpenROAD (P
 	    'SRAM_DEFINE=$(SRAM_DEFINE) librelane $(LIBRELANE_CONFIGS) $(LIBRELANE_OPTS) --last-run --flow OpenInOpenROAD'
 .PHONY: open-openroad
 
-clean: ## Remove generated sim/harden artifacts (keeps the PDK volume)
+clean: ## Remove generated sim/harden artifacts (keeps the PDK in ./pdk)
 	rm -rf cocotb/sim_build cocotb/results.xml cocotb/__pycache__ \
 	       librelane/runs final src/generated_defines.svh
 .PHONY: clean

@@ -62,10 +62,10 @@ only `root` can talk to it. A fresh install therefore makes `make build-sim` (an
 `docker`/`make` command) fail with a **permission denied** error, and `sudo make ...` looks
 like the fix.
 
-**Don't reach for `sudo`.** The containers live-mount this repo at `/work` and write into a
-shared PDK volume; running them as root makes those files **root-owned**, which causes
-confusing "permission denied" failures later when your normal user tries to read or clean
-them. The correct, one-time fix is to add your user to the `docker` group:
+**Don't reach for `sudo`.** The containers live-mount this repo at `/work` and write into it
+(including the `./pdk` download); running them as root makes those files **root-owned**, which
+causes confusing "permission denied" failures later when your normal user tries to read or
+clean them. The correct, one-time fix is to add your user to the `docker` group:
 
 ```bash
 sudo usermod -aG docker $USER
@@ -76,9 +76,9 @@ sudo usermod -aG docker $USER
 > and so do all the `make` targets. Full official steps (including rootless mode) are at
 > <https://docs.docker.com/engine/install/linux-postinstall/>.
 
-If you already ran things with `sudo` and now have root-owned files in the repo or PDK
-volume, fix ownership with `sudo chown -R $USER:$USER .` (and re-run `make pdk` if the PDK
-volume got tangled).
+If you already ran things with `sudo` and now have root-owned files in the repo (including
+`./pdk`), fix ownership with `sudo chown -R $USER:$USER .` (and re-run `make pdk` if the
+`./pdk` download got tangled).
 
 ---
 

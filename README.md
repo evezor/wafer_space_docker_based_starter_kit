@@ -119,7 +119,7 @@ Read these in order. Each builds on the one before.
 | 2 | [`docs/01_GETTING_STARTED.md`](docs/01_GETTING_STARTED.md) | Install prerequisites, clone, get the sim green, optional first harden. |
 | 3 | [`docs/02_THE_FLOW.md`](docs/02_THE_FLOW.md) | The full pipeline stage by stage, with a diagram and file/command map. |
 | 4 | [`docs/03_CONTINUE_THE_DESIGN.md`](docs/03_CONTINUE_THE_DESIGN.md) | **The "how to make it yours" guide** — edit `chip_core.sv`, add tests, grow. |
-| 5 | [`docs/04_HARDENING_GUIDE.md`](docs/04_HARDENING_GUIDE.md) | Path A (Docker) vs Path B (Nix), exact harden commands, reading results. |
+| 5 | [`docs/04_HARDENING_GUIDE.md`](docs/04_HARDENING_GUIDE.md) | Path A (Docker) vs Path B (Nix), exact harden commands, reading results, getting your files out of the container. |
 | 6 | [`docs/05_WAFERSPACE_SUBMISSION.md`](docs/05_WAFERSPACE_SUBMISSION.md) | Slot sizes, pinout/bond-out, tapeout cells, seal ring, submission checklist. |
 | 7 | [`docs/06_TROUBLESHOOTING.md`](docs/06_TROUBLESHOOTING.md) | Real problems and fixes from a proven run. |
 

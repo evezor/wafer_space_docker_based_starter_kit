@@ -52,7 +52,7 @@ make pdk
 
 > **You should see:** `ciel` (the PDK manager) downloading the **gf180mcuD** PDK, pinned at
 > commit `019cf7a3e0de79bb0e4b6213758882d283c65816`, about **4 GB**. This is a one-time
-> download — it lands in a PDK cache (`./gf180mcu`) and is reused by every harden. If the
+> download — it lands in the local `./pdk` folder and is reused by every harden. If the
 > download times out mid-stream, just run `make pdk` again; a retry usually completes
 > cleanly.
 
@@ -252,6 +252,60 @@ Everything the flow produces lands here.
 | `metrics.json` / `.csv` | All the signoff counts. |
 | `manufacturability.rpt` | The all-Passed report. |
 | `render/chip_top.png` | A picture of your die. |
+
+---
+
+## Getting your files out of the container
+
+A common worry with Docker is that your results are "trapped" inside the container. **They
+are not.** Both the sim and harden containers **bind-mount this repo** at `/work` (see
+`docker-compose.yml`: `.:/work`), which means anything the tools write *under the repo
+tree* is written straight to your real filesystem — the same bytes, the same files, no
+copy-out step. The container and your host are looking at one directory.
+
+So the outputs you care about are already on your machine, at these paths in the repo:
+
+| Output | Lands on your host at | Produced by |
+|---|---|---|
+| The GDSII + all signoff views | `final/` | `make harden` (`--save-views-to /work/final`) |
+| The full per-run output (logs, every step, reports) | `librelane/runs/RUN_<timestamp>/` | `make harden` |
+| The simulation waveform | `chip_core.vcd` (repo root) | `make sim` (`$dumpfile` in `tb/tb_chip_core.sv`) |
+| cocotb results | `cocotb/sim_build/`, `cocotb/results.xml` | `make sim-cocotb` |
+
+Open any of them with your normal host tools — load `chip_core.vcd` in GTKWave, open
+`final/gds/chip_top.gds` in a natively installed KLayout, read `final/manufacturability.rpt`
+in your editor. No extraction needed. (`final/` and `librelane/runs/` are gitignored — that
+is deliberate; they are build output, not source.)
+
+### The PDK is a folder too — `./pdk`
+
+The PDK is the one big *input* (rather than an output), but it is **also just a host
+folder**. `docker-compose.yml` bind-mounts it into the containers at `/pdk` from
+`${PDK_ROOT:-./pdk}`, so `make pdk` downloads the ~4 GB straight into `./pdk` in your repo.
+You can see it, back it up, or delete it with a plain `rm -rf pdk` — there is no Docker
+volume to learn or manage. It is gitignored, so it never bloats your history. To share one
+download across several checkouts, set `PDK_ROOT` (in `.env` or your shell) to a path
+outside the repo.
+
+### Why there is no `docker cp` step here
+
+If you have used Docker before you might reach for `docker cp <container>:/path ./`. That
+will not work here, and you do not need it: **every target in this kit runs the container
+with `--rm`** (`docker compose run --rm …`), so the container is deleted the instant the
+command finishes — there is no leftover container to copy from. The bind mount is what makes
+that safe: results are already on your host before the container exits.
+
+The practical rule that follows: **write outputs under `/work`** (anywhere in the repo tree)
+and they persist automatically. If you run a custom command that writes somewhere else
+inside the container — `/tmp`, `/root`, `~` — that file dies with the `--rm` container.
+Either redirect it under `/work`, or run an interactive container *without* `--rm` and
+`docker cp` it out before removing the container by hand.
+
+> 🐧 **Linux note:** files the container writes into the repo — including the `./pdk`
+> download — may come out **root-owned** (the container runs as root unless you have set up
+> the docker group). If you later cannot read or `make clean` them, fix ownership with
+> `sudo chown -R $USER:$USER .`. The root cause and the proper one-time fix (the `docker`
+> group) are in `06_TROUBLESHOOTING.md`, #11.
 
 ---
 

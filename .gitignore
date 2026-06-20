@@ -11,7 +11,7 @@ sim_build/
 librelane/runs/
 final/
 
-# --- PDK (downloaded by `make pdk`, multi-GB; lives in a Docker volume or ./pdk) ---
+# --- PDK (downloaded by `make pdk`, multi-GB; lives in ./pdk) ---
 .ciel/
 ciel/
 pdk/
