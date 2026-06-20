@@ -235,6 +235,42 @@ make open-openroad   # opens the design in OpenROAD (interactive inspection)
 > you can open `final/gds/chip_top.gds` in a locally installed copy of KLayout. See
 > `08_TROUBLESHOOTING.md` (symptom #10).
 
+### Seeing named, colored layers (load the layer-properties file)
+
+Open a raw `.gds` in a plain KLayout and the layer panel shows **bare GDS numbers** —
+`34/0`, `30/0`, … — in arbitrary colors. To see them as **named, properly colored layers**
+(`Metal1`, `Poly2`, `Via1`, `Contact`, the pad and marker layers…) you load a **KLayout
+layer-properties file**: a `.lyp` (XML) that maps every GDS layer/datatype to a name, color,
+and fill pattern. That `.lyp` is the "map that names all the layers."
+
+Where to get the GF180MCU one:
+
+- **From the PDK (authoritative).** After `make pdk`, it ships *inside* the PDK under
+  `libs.tech/klayout/` — the file is `gf180mcu.lyp`, usually next to the KLayout *technology*
+  file `gf180mcu.lyt`. This names the full process layer stack, so you may already have it.
+- **From this repo.** [`librelane/gf180mcu_render.lyp`](../librelane/gf180mcu_render.lyp) is a
+  render-tuned `.lyp` — it's what `make harden` uses to colorize `final/render/chip_top.png`,
+  handy if you just want the layout to look like the generated render.
+
+Load it in KLayout: **File → Load Layer Properties…**, pick the `.lyp`, and apply it to the
+view. The layer panel switches to named, colored entries. For the *full* tech setup (layers
+**plus** the DRC menus), open the technology file (`.lyt`) instead.
+
+<p align="center">
+  <img src="../images/KLayout.png" alt="chip_top GDS opened in KLayout with the GF180MCU layer-properties loaded, showing named layers" width="820"><br>
+  <sub><i>The hardened <code>chip_top</code> in a standalone KLayout with the GF180MCU <code>.lyp</code> loaded: the right-hand panel lists <b>named, colored</b> layers (<code>Metal1</code>, <code>Poly2</code>, <code>Via1</code>, <code>Contact</code>…) instead of bare GDS numbers. The pad ring frames the placed-and-routed standard-cell core.</i></sub>
+</p>
+
+> ℹ️ `make open-klayout` already applies the right layer properties (it goes through
+> LibreLane). You only need to load the `.lyp` by hand when you open
+> `final/gds/chip_top.gds` in a **standalone** KLayout — the common case on Windows.
+
+> 💡 If you were handed a *project-specific* `.lyp`/`.lyt` that also names the wafer.space
+> pad-ring, tapeout-IP, and seal-ring/marker layers, prefer it — it's the same kind of file,
+> just more complete than the base PDK set. When you ask for it, ask for the **GF180MCU
+> KLayout layer-properties (`.lyp`) / technology (`.lyt`) file** — not the GDS *layermap*
+> (`.map`), which is for stream-out and won't name layers in the viewer.
+
 ---
 
 ## The deliverables in `final/`

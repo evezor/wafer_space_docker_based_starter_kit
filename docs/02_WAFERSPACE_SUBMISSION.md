@@ -13,6 +13,13 @@ rather than anything cached here.
 
 ## What is wafer.space?
 
+<p align="center">
+  <a href="https://wafer.space"><picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../images/wafer.space_logo-white.png">
+    <img src="../images/wafer.space_logo.png" alt="wafer.space logo" width="150">
+  </picture></a>
+</p>
+
 **[wafer.space](https://wafer.space)** is a budget silicon-manufacturing service — *"create
 integrated circuits without breaking the bank."* It runs shared **GF180MCU** (GlobalFoundries
 180 nm) **shuttles**: many independent designs share a single wafer, so you buy one **slot**

@@ -13,6 +13,13 @@
 
 ## Targeting [wafer.space](https://wafer.space)
 
+<p align="center">
+  <a href="https://wafer.space"><picture>
+    <source media="(prefers-color-scheme: dark)" srcset="images/wafer.space_logo-white.png">
+    <img src="images/wafer.space_logo.png" alt="wafer.space logo" width="170">
+  </picture></a>
+</p>
+
 This kit exists to take a design all the way to a **[wafer.space](https://wafer.space)** shuttle. wafer.space is a *budget silicon-manufacturing* service — its tagline is **"create integrated circuits without breaking the bank."** It runs shared **GF180MCU** (GlobalFoundries 180 nm) **shuttles**: many independent designs share a single wafer, so you buy one **slot** instead of paying for a whole manufacturing run. You design, simulate, and verify your chip with this kit, then submit the resulting GDSII to a wafer.space shuttle, which returns physical dies (with optional chip-on-board packaging or full undiced-wafer delivery).
 
 **Useful links:** [wafer.space](https://wafer.space) · [Buy a slot / current pricing](https://buy.wafer.space) · [Discord community](https://discord.gg/43y2t53jpE) · [GitHub org](https://github.com/wafer-space) · [Project template](https://github.com/wafer-space/gf180mcu-project-template) · [Submission precheck](https://github.com/wafer-space/gf180mcu-precheck) · [Run 1 projects](https://github.com/wafer-space/ws-run1)
