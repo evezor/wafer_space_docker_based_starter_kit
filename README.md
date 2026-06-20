@@ -45,8 +45,6 @@ You. Specifically: someone who has **never made a chip before** and wants to. Yo
 
 The fastest path from nothing to a **green simulation** — proof the whole kit works on your machine. This is the short version; for the same steps with a success signal explained at each stage, follow [`docs/01_GETTING_STARTED.md`](docs/01_GETTING_STARTED.md) instead.
 
-**Before you start:** install **Docker Desktop** and **git** (on Windows, also **WSL2**, and run `make` from inside it). Full install instructions → [`docs/01_GETTING_STARTED.md`](docs/01_GETTING_STARTED.md).
-
 ```bash
 # 1. Get the code
 git clone https://github.com/evezor/wafer_space_docker_based_starter_kit.git
