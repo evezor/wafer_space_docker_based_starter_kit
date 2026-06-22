@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
-// chip_core: SCAFFOLD STUB -- the ONE file you edit.
+// chip_core: SCAFFOLD STUB -- .
 //
 // What it does (trivial on purpose, so the flow is green before you write logic):
 //   - A free-running counter increments every clock after reset.

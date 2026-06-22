@@ -79,6 +79,31 @@ You just ran the same pipeline a real tapeout uses — RTL → simulate → veri
 
 ---
 
+## Make it yours
+
+**After you harden the sample and verify the container works end to end, it's time to start designing your own chip.**
+
+Yes — this **is** Verilog. More precisely it's **SystemVerilog** (the `.sv` files): the modern superset of Verilog, and the standard *hardware description language* (HDL) for digital chips. You describe *what the hardware should do*, and the harden flow turns that description into a physical layout.
+
+You edit exactly one file — **[`src/chip_core.sv`](src/chip_core.sv)**, your logic sitting behind the chip's pad ring. The wrapper **`src/chip_top.sv`** (the pad ring and tapeout IP) is **do-not-edit**: it connects every I/O pad to your core *by name*, so changing it can break the layout.
+
+Inside `chip_core.sv`, keep the module's **port list** and the **pad-config assigns** exactly as shipped, then swap the example logic — a gated counter with a "chip alive" heartbeat — for your own. That replaceable block is just this:
+
+```systemverilog
+// --- the design: a gated free-running counter ---   <-- replace this with your engine
+wire count_en = input_in[0];        // input pad 0 gates the counter
+reg [23:0] counter;
+always @(posedge clk) begin
+    if (!rst_n)        counter <= 24'd0;     // active-low reset clears the count
+    else if (count_en) counter <= counter + 24'd1;
+end
+wire heartbeat = counter[23];       // slow "chip alive" toggle
+```
+
+Then re-run `make sim` (it must stay green) and re-harden. The full walkthrough — adding a golden-model test, growing the design, changing slots — is in [`docs/06_CONTINUE_THE_DESIGN.md`](docs/06_CONTINUE_THE_DESIGN.md), with the per-file editing rules in [`src/README.md`](src/README.md).
+
+---
+
 ## Directory map
 
 ```
@@ -111,8 +136,6 @@ wafer_space_docker_based_starter_kit/
 ├── final/                     # GDSII + signoff deliverables land here (gitignored)
 └── docs/                      # all the guides (see the documentation map below)
 ```
-
-> ℹ️ The **one file you edit** is `src/chip_core.sv`. Everything in `src/chip_top.sv` (the pad ring and tapeout IP) is do-not-edit — touching it can break the layout. See [`docs/06_CONTINUE_THE_DESIGN.md`](docs/06_CONTINUE_THE_DESIGN.md) for the full "make it yours" guide.
 
 ---
 
