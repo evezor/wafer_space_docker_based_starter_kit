@@ -131,6 +131,7 @@ These run from concepts, to a submitted sample, to designing your own — read i
 | 7 | [`docs/06_CONTINUE_THE_DESIGN.md`](docs/06_CONTINUE_THE_DESIGN.md) | **The "how to make it yours" guide** — edit `chip_core.sv`, add tests, grow. |
 | 8 | [`docs/07_HARDENING_GUIDE.md`](docs/07_HARDENING_GUIDE.md) | Path A (Docker) vs Path B (Nix), exact harden commands, reading results, getting your files out of the container. |
 | 9 | [`docs/08_TROUBLESHOOTING.md`](docs/08_TROUBLESHOOTING.md) | Real problems and fixes from a proven run. |
+| 10 | [`docs/09_FLOW_STEPS.md`](docs/09_FLOW_STEPS.md) | Reference: every numbered step the harden flow runs, in order, with a one-line description of each. |
 
 ---
 

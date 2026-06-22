@@ -67,10 +67,11 @@ make pdk        # one-time (skip if already done)
 make harden     # RTL -> GDSII via the prebuilt LibreLane Docker image
 ```
 
-> **You should see:** LibreLane stepping through roughly 80 numbered stages (synthesis,
+> **You should see:** LibreLane stepping through its ~80 numbered stages (synthesis,
 > floorplan, placement, routing, signoff…) and finishing by writing the final views. The
 > end of a clean run reports the signoff as passed (see "What a clean signoff looks like"
-> below).
+> below). The complete ordered list, with a one-line description of every step, is in
+> [`09_FLOW_STEPS.md`](09_FLOW_STEPS.md).
 
 To target a different slot, prefix the command with `SLOT=`:
 
@@ -150,8 +151,10 @@ librelane/runs/RUN_<timestamp>/
 └── ...
 ```
 
-The flow runs about 80 numbered steps; the last one saves the final views. **The first
-file you open after a run is `manufacturability.rpt`** — the human-readable verdict.
+The flow runs about 80 numbered steps (the complete ordered list, with a one-line
+description of each, is in [`09_FLOW_STEPS.md`](09_FLOW_STEPS.md)); the last one saves the
+final views. **The first file you open after a run is `manufacturability.rpt`** — the
+human-readable verdict.
 
 ---
 
