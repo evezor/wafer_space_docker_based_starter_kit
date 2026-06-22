@@ -10,10 +10,10 @@
 #   https://github.com/librelane/librelane/pkgs/container/librelane
 # NOTE: LibreLane does NOT publish a `latest` tag — only version-pinned tags
 # (e.g. 3.0.4, 3.1.0.dev1). Always pin a SPECIFIC tag for reproducibility.
-# This tag (3.1.0.dev1) matches the Nix-pinned librelane rev in flake.lock
-# (rev 3131cc551528fb4b06ce30aa7219a2a3718c333e on the `dev` branch), so Path A
-# (Docker) and Path B (Nix) run the same LibreLane.
-ARG LIBRELANE_IMAGE=ghcr.io/librelane/librelane:3.1.0.dev1
+# The Nix path (Path B) pins librelane via flake.lock on the `dev` branch; bump
+# that pin to the matching rev if you want Path A (Docker) and Path B (Nix) to
+# run the exact same LibreLane.
+ARG LIBRELANE_IMAGE=ghcr.io/librelane/librelane:3.1.0.dev2
 FROM ${LIBRELANE_IMAGE}
 
 # `ciel` (the PDK fetcher) ships with the LibreLane image. If a future image drops
