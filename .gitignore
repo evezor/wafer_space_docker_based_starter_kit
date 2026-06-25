@@ -7,6 +7,7 @@ cocotb/results.xml
 cocotb/__pycache__/
 sim_build/
 
+
 # --- LibreLane / GDSII outputs (large, regenerated) ---
 librelane/runs/
 final/
@@ -23,6 +24,7 @@ generated_defines.svh
 
 # --- local env overrides ---
 .env
+scratch/
 
 # --- python ---
 __pycache__/

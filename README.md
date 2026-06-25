@@ -100,7 +100,7 @@ end
 wire heartbeat = counter[23];       // slow "chip alive" toggle
 ```
 
-Then re-run `make sim` (it must stay green) and re-harden. The full walkthrough — adding a golden-model test, growing the design, changing slots — is in [`docs/06_CONTINUE_THE_DESIGN.md`](docs/06_CONTINUE_THE_DESIGN.md), with the per-file editing rules in [`src/README.md`](src/README.md).
+Then re-run `make sim` (it must stay green) and re-harden. The full walkthrough — adding a golden-model test, growing the design — is in [`docs/06_CONTINUE_THE_DESIGN.md`](docs/06_CONTINUE_THE_DESIGN.md); changing a pad's cell type or the slot is the advanced [`docs/06b_CHANGING_THE_PAD_RING.md`](docs/06b_CHANGING_THE_PAD_RING.md). The per-file editing rules are in [`src/README.md`](src/README.md).
 
 ---
 
@@ -152,6 +152,7 @@ These run from concepts, to a submitted sample, to designing your own — read i
 | 5 | [`docs/04_THE_FLOW.md`](docs/04_THE_FLOW.md) | The full pipeline stage by stage, with a diagram and file/command map. |
 | 6 | [`docs/05_ANATOMY_OF_THE_SAMPLE.md`](docs/05_ANATOMY_OF_THE_SAMPLE.md) | A file-by-file anatomy of the shipped example: what it does and exactly where each behavior and its golden-model check live. |
 | 7 | [`docs/06_CONTINUE_THE_DESIGN.md`](docs/06_CONTINUE_THE_DESIGN.md) | **The "how to make it yours" guide** — edit `chip_core.sv`, add tests, grow. |
+| ↳ | [`docs/06b_CHANGING_THE_PAD_RING.md`](docs/06b_CHANGING_THE_PAD_RING.md) | *Advanced appendix to 06* — change a pad's cell type or the slot (edits `chip_top.sv` + the slot YAML). Skip on a first design. |
 | 8 | [`docs/07_HARDENING_GUIDE.md`](docs/07_HARDENING_GUIDE.md) | Path A (Docker) vs Path B (Nix), exact harden commands, reading results, getting your files out of the container. |
 | 9 | [`docs/08_TROUBLESHOOTING.md`](docs/08_TROUBLESHOOTING.md) | Real problems and fixes from a proven run. |
 | 10 | [`docs/09_FLOW_STEPS.md`](docs/09_FLOW_STEPS.md) | Reference: every numbered step the harden flow runs, in order, with a one-line description of each. |

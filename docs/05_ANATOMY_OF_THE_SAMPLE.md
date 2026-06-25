@@ -97,7 +97,9 @@ required wafer.space tapeout-marker cells (`qrcode_id`, `shuttle_id`, `project_i
 `marker`, and the optional `logo`) — lives in `src/chip_top.sv`. It contains no design
 logic; it's pure plumbing between the pads and your core, which is why it's a do-not-edit
 boundary. The rules are in [`06_CONTINUE_THE_DESIGN.md`](06_CONTINUE_THE_DESIGN.md) and
-[`02_WAFERSPACE_SUBMISSION.md`](02_WAFERSPACE_SUBMISSION.md).
+[`02_WAFERSPACE_SUBMISSION.md`](02_WAFERSPACE_SUBMISSION.md); the deliberate exceptions —
+changing a pad's cell type or the slot — are in
+[`06b_CHANGING_THE_PAD_RING.md`](06b_CHANGING_THE_PAD_RING.md).
 
 ---
 
@@ -159,7 +161,7 @@ index; the full rules and the pad contract are in
 | Change the **test scenario / checks** | `tb/tb_chip_core.sv` | it drives the DUT and compares to the golden vector |
 | **Add** more RTL `.sv` files | `librelane/config.yaml` (`VERILOG_FILES`) **and** `cocotb/chip_top_tb.py` | so the harden flow and the pad-level sim both see the new files |
 | Target a **different slot** | pass `SLOT=…` to `make` (don't hand-edit pad counts) | it picks the budget from `src/slot_defines.svh` via `make defines` |
-| Touch the **padring or tapeout IP** | `src/chip_top.sv` | **don't** — it's a do-not-edit boundary; editing it can break the layout or tapeout |
+| Touch the **padring or tapeout IP** | `src/chip_top.sv` | **don't** for everyday work — it's a do-not-edit boundary. The deliberate exceptions (change a pad's cell type or the slot) have a walkthrough in [`06b_CHANGING_THE_PAD_RING.md`](06b_CHANGING_THE_PAD_RING.md) |
 
 The discipline that makes this tractable: **stay in the fast inner loop** (edit
 `chip_core.sv` → `make sim` → fix → repeat, seconds per cycle, no PDK) and only
@@ -173,6 +175,7 @@ The discipline that makes this tractable: **stay in the fast inner loop** (edit
 This page is the edge of what *this* repo teaches. To go deeper:
 
 - **The pad contract and growing the design** — [`06_CONTINUE_THE_DESIGN.md`](06_CONTINUE_THE_DESIGN.md).
+- **Changing the pad ring** (a pad's cell type, or the slot) — [`06b_CHANGING_THE_PAD_RING.md`](06b_CHANGING_THE_PAD_RING.md).
 - **Hardening internals** (synthesis → floorplan → route → signoff) — [`07_HARDENING_GUIDE.md`](07_HARDENING_GUIDE.md) and the [LibreLane docs](https://librelane.readthedocs.io).
 - **Slots, pinout, and tapeout cells** — [`02_WAFERSPACE_SUBMISSION.md`](02_WAFERSPACE_SUBMISSION.md).
 - **The upstream production template** this kit is built on — [gf180mcu-project-template](https://github.com/wafer-space/gf180mcu-project-template).

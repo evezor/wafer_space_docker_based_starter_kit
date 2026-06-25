@@ -5,6 +5,10 @@ the chip *yours*. This page is the "where do I look / how do I keep going" guide
 which file to edit, the rules that file must obey, how to build a trustworthy test, and
 how to grow from the trivial scaffold into a real design.
 
+The single biggest thing to understand before you touch a pad is that **three different
+files do three different jobs**, and people get stuck because they blur them together. So
+we start there.
+
 If a term is new, it is defined the first time it appears.
 
 ---
@@ -30,33 +34,74 @@ contract. The rule is simple:
 
 ---
 
-## The one file you edit: `src/chip_core.sv`
+## The mental model: two layers, and the YAML is neither
 
-`chip_core` is your design. It sits entirely behind the pad ring and talks to the outside
-world only through the pad contract described below. The shipped version is a tiny
-heartbeat counter so the scaffold is green and harden-clean out of the box. You replace
-the body with real logic while keeping the port list and pad-config contract intact.
+Almost every "wait, how do pads work?" question dissolves once you see that a pad's
+behavior is decided in **two separate places**, and that the slot YAML is *not* one of
+them:
 
-> 📚 New to SystemVerilog? Skim the learning links in
-> [`00_ASIC_FOR_BEGINNERS.md`](00_ASIC_FOR_BEGINNERS.md) before you start editing — the
-> example is a gentle thing to learn on.
+| | Where it's set | When it's fixed | What it decides |
+|---|---|---|---|
+| **Layer A — the physical cell** | `src/chip_top.sv` | **At tapeout. Permanent.** | The *hardware* in that pin: whether a driver/receiver/analog structure even exists. |
+| **Layer B — runtime config** | `src/chip_core.sv` | **Every clock. Changeable.** | For a bidir cell only: direction, pulls, drive strength, slew. |
+| The **slot YAML** (`librelane/slots/slot_*.yaml`) | — | — | **Neither.** Just *where* each pad sits on the ring (placement). |
 
-### What *not* to touch in `chip_top.sv`
+Hold onto this: **the cell type is the hardware; `oe/ie/pu/pd/cs/sl` is the
+configuration; the YAML is the seating chart.** The rest of this section unpacks each.
 
-`src/chip_top.sv` is a **do-not-edit boundary**. It is copied verbatim from the
-wafer.space project template and contains no design logic of its own — it is pure
-plumbing between the silicon pads and your core. Specifically, do not:
+### Layer A — the physical cell (the real silicon)
 
-- Rename the pad-ring **generate blocks** (`bidir`, `inputs`, `analog`, `*_pads`). The
-  slot YAML files (`librelane/slots/slot_*.yaml`) reference these blocks by instance path
-  to place pads. Rename one and the harden breaks.
-- Remove the required **tapeout IP cells** (more on these in
-  `02_WAFERSPACE_SUBMISSION.md`): `qrcode_id`, `shuttle_id`, `project_id`, and `marker`.
-  The `logo` cell is decorative and may be removed.
+Each pin on the die is **one** foundry I/O cell, instantiated in `chip_top.sv`. The cell
+type is what physically exists and sets the *envelope* of what that pin can ever do. The
+kit uses these signal cells:
 
-The only legitimate reasons to edit `chip_top.sv` are (a) you change which slot you
-target, or (b) you genuinely need a different pad *type* on some pad. Both are advanced
-moves; see `src/README.md`.
+| In `chip_top.sv` | Foundry cell (gf180mcu I/O) | What it physically is |
+|---|---|---|
+| `clk_pad` | `…io__in_s` | **Input only**, Schmitt-trigger (clean edges on a noisy clock). No output driver. |
+| `rst_n_pad`, `inputs[i].pad` | `…io__in_c` | **Input only.** No `A`/`OE` pins exist — it *cannot* drive out. |
+| `bidir[i].pad` | `…io__bi_24t` | **Universal digital.** Driver + receiver + enables: input, output, *or* true bidirectional. |
+| `analog[i].pad` | `…io__asig_5p0` | **Analog passthrough only.** No digital buffer at all (5 V analog). |
+| `dvdd/dvss/vdd/vss pads` | `…io__dvdd/dvss/vdd/vss` | Supply + ESD ring (not signals). |
+
+The crucial consequences:
+
+- An **input cell (`in_c`) has no output driver** — the transistors to drive the pin
+  simply are not in the cell. No amount of software makes it an output.
+- An **analog cell (`asig_5p0`) has no digital buffer** — it can't be used as logic I/O.
+- A **bidir cell (`bi_24t`) is a superset.** It contains everything an input cell has
+  *plus* a driver and enables, so it can *impersonate* an input (disable the driver) or
+  act as a dedicated output, or switch direction at runtime.
+
+> **The takeaway that fixes most confusion:** the only thing that permanently decides a
+> pin's capability is **which cell `chip_top` instantiates** — not the YAML, and not the
+> signals your core drives.
+
+### Layer B — runtime configuration (changes nothing physical)
+
+For each **bidir** pad your core drives a handful of control nets — `oe`, `ie`, `pu`,
+`pd`, `cs`, `sl`. These are *inputs to a fixed cell*. Setting `bidir_oe[i]=0` does **not**
+remove the driver from the silicon; it just turns it off this cycle. This layer is pure
+configuration — it's "software" that happens to run on a wire.
+
+### The slot YAML — placement only
+
+`librelane/slots/slot_1x1.yaml` is **floorplan + ring placement**, and that's *all*:
+
+- `DIE_AREA` / `CORE_AREA` — die and seal-ring geometry for the slot.
+- `PAD_SOUTH / EAST / NORTH / WEST` — the **side and order** each pad instance sits on the
+  ring. The strings like `"bidir\[0\].pad"`, `"inputs\[3\].pad"`, `"dvdd_pads\[0\].pad"`
+  are **instance paths that must match the generate blocks in `chip_top.sv`** — that
+  matching is the *only* thing tying the YAML to the design.
+
+So when you see `"bidir\[0\].pad"` in the YAML, it is **not** assigning a role. It's a
+pointer that says "the cell `chip_top` already built at instance `bidir[0]` goes *here* on
+the edge." The label looks like a job title; it's really a seat number.
+
+What the slot standard genuinely *fixes* (the **hard** constraints) is only: the die/seal
+geometry, the ring positions, and **where the power/ground pads must sit** (the
+dvdd/dvss/vdd/vss pads are interleaved deliberately for power delivery and ESD — see the
+comments in the YAML). Everything about *signal* pads is yours to allocate (see
+[Allocation is yours](#allocation-is-yours-bidir-is-the-universal-pad) below).
 
 ---
 
@@ -91,37 +136,63 @@ ships, so just keep it):
 ```systemverilog
 `default_nettype none
 
+// "module chip_core ( ... )" — everything inside the parentheses is the PORT LIST:
+// the list of wires that cross the edge of your design. It only NAMES the wires and
+// says which way each flows. It does NOT define any pad's behavior — that happens in
+// the module body further down (the assign/always lines). The physical pads live in
+// chip_top.sv; these are just the wires that connect to them.
 module chip_core #(
-    // Defaults are placeholders; chip_top always overrides all three explicitly.
-    // iverilog -g2012 requires a default in the ANSI parameter port list.
-    parameter NUM_INPUT_PADS  = 12,
-    parameter NUM_BIDIR_PADS  = 40,
-    parameter NUM_ANALOG_PADS = 2
+    // ---- parameters: compile-time numbers chip_top fills in for your slot ----
+    parameter NUM_INPUT_PADS  = 12,   // how many input pads this slot has (1x1 = 12)
+    parameter NUM_BIDIR_PADS  = 40,   // how many bidir pads this slot has (1x1 = 40)
+    parameter NUM_ANALOG_PADS = 2     // how many analog pads this slot has (1x1 = 2)
 )(
+    // How to read every line below:
+    //   input  = the wire comes FROM the pad ring INTO your core (you READ it)
+    //   output = your core DRIVES the wire OUT to the pad ring   (you SET it)
+    //   inout  = bidirectional electrical net (only power & analog use this)
+    //   [N-1:0] = a BUNDLE of N wires ("a bus"), one wire per pad, indexed 0..N-1
+    //   The ORDER of these lines is just readability — it has no electrical meaning.
+
     `ifdef USE_POWER_PINS
-    inout  wire VDD,
-    inout  wire VSS,
+    inout  wire VDD,    // power net  (bidirectional; only present in the layout build)
+    inout  wire VSS,    // ground net
     `endif
 
-    input  wire clk,
-    input  wire rst_n,                                  // active low
+    input  wire clk,    // 1 wire IN: the clock, from the clock pad over in chip_top
+    input  wire rst_n,  // 1 wire IN: reset, active LOW (0 = reset, 1 = run)
 
-    input  wire [NUM_INPUT_PADS-1:0] input_in,
-    output wire [NUM_INPUT_PADS-1:0] input_pu,
-    output wire [NUM_INPUT_PADS-1:0] input_pd,
+    // ---- INPUT pads: data only ever flows IN (these pads can't drive out) ----
+    input  wire [NUM_INPUT_PADS-1:0] input_in,  // 12 wires IN:  value sensed at each input pad. input_in[3] == input pad 3.
+    output wire [NUM_INPUT_PADS-1:0] input_pu,  // 12 wires OUT: your pull-up   on/off for each input pad
+    output wire [NUM_INPUT_PADS-1:0] input_pd,  // 12 wires OUT: your pull-down on/off for each input pad
 
-    input  wire [NUM_BIDIR_PADS-1:0] bidir_in,
-    output wire [NUM_BIDIR_PADS-1:0] bidir_out,
-    output wire [NUM_BIDIR_PADS-1:0] bidir_oe,
-    output wire [NUM_BIDIR_PADS-1:0] bidir_cs,
-    output wire [NUM_BIDIR_PADS-1:0] bidir_sl,
-    output wire [NUM_BIDIR_PADS-1:0] bidir_ie,
-    output wire [NUM_BIDIR_PADS-1:0] bidir_pu,
-    output wire [NUM_BIDIR_PADS-1:0] bidir_pd,
+    // ---- BIDIR pads: each wire's pad can be an input OR an output; you choose ----
+    input  wire [NUM_BIDIR_PADS-1:0] bidir_in,  // 40 wires IN:  value sensed at each bidir pad. bidir_in[5] == bidir pad 5.
+    output wire [NUM_BIDIR_PADS-1:0] bidir_out, // 40 wires OUT: the value to drive WHEN that pad is set to output
+    output wire [NUM_BIDIR_PADS-1:0] bidir_oe,  // 40 wires OUT: direction switch. 1 = pad outputs, 0 = pad inputs.
+    output wire [NUM_BIDIR_PADS-1:0] bidir_cs,  // 40 wires OUT: drive-strength setting, per pad
+    output wire [NUM_BIDIR_PADS-1:0] bidir_sl,  // 40 wires OUT: slew-rate (edge speed) setting, per pad
+    output wire [NUM_BIDIR_PADS-1:0] bidir_ie,  // 40 wires OUT: input-enable, per pad (you must drive it = ~bidir_oe)
+    output wire [NUM_BIDIR_PADS-1:0] bidir_pu,  // 40 wires OUT: pull-up   setting, per pad
+    output wire [NUM_BIDIR_PADS-1:0] bidir_pd,  // 40 wires OUT: pull-down setting, per pad
 
-    inout  wire [NUM_ANALOG_PADS-1:0] analog
+    // ---- ANALOG pads: straight-through analog, no logic, no direction ----
+    inout  wire [NUM_ANALOG_PADS-1:0] analog    // 2 wires: analog passthrough, one per analog pad
 );
 ```
+
+> 🧭 **How to read this block (the part that trips everyone up).**
+>
+> - **Is this where I define a pad's function?** **No.** This is a *declaration* — it
+>   just lists the wires and their direction. You assign a pad's function later, in the
+>   body, by *driving* these wires (e.g. `assign bidir_oe = ...;` decides direction;
+>   `assign bidir_out = ...;` decides what an output pad shows).
+> - **What does `bidir_in` mean?** "The values currently sensed at the bidir pads,
+>   flowing into the core." It's an `input` (into your core) and it's a bus of 40 wires.
+> - **What pad does a wire map to?** **By bit index.** `bidir_out[5]` is bidir pad 5,
+>   `input_in[3]` is input pad 3, and so on. *Which physical edge of the die* pad 5 sits
+>   on is set by the slot YAML — but the wire-to-pad number is always just the index.
 
 > ℹ️ **Note:** the parameter defaults (`12 / 40 / 2`) are *inert placeholders*. The
 > `iverilog -g2012` SystemVerilog mode rejects an ANSI parameter that has no default, so
@@ -135,14 +206,15 @@ on-chip RAM macros). Do not add SRAM macros unless you also wire them into
 
 ---
 
-## The pad model and the `oe` direction contract
+## Driving each pad type from your core
 
-A **pad** is one physical connection point on the edge of the die. Your slot gives you
-three kinds.
+Now the practical part: given the cell at each pin (Layer A), what must your core drive
+(Layer B)? Each pad category maps to one cell from the table above.
 
-### Input pads (`input_in[]`)
+### Input pads (`input_in[]`) — the `in_c` cell
 
-These are **always inputs** — data only ever flows into the core.
+These are **always inputs** — and now you know *why*: the `in_c` cell has no output
+driver. Data only ever flows into the core.
 
 - The core reads data on `input_in[i]`.
 - The core drives each pad's pull configuration via `input_pu[i]` / `input_pd[i]` (a
@@ -153,10 +225,10 @@ These are **always inputs** — data only ever flows into the core.
   (sit at an undefined voltage). Adding board-level pulls is part of bring-up, which is
   beyond this kit's scope.
 
-### Bidir pads (`bidir_*`) and the `oe` mask
+### Bidir pads (`bidir_*`) — the `bi_24t` cell and the `oe` mask
 
-A **bidir** (bidirectional) pad can act as an output *or* an input — you choose, **per
-bit**, with the **output-enable** signal `bidir_oe`:
+A **bidir** pad can act as an output *or* an input — you choose, **per bit**, with the
+**output-enable** signal `bidir_oe`:
 
 - `bidir_oe[i] = 1` makes bit *i* an **output**. The core drives the data on
   `bidir_out[i]`.
@@ -191,28 +263,81 @@ assign bidir_pd = '0;            // pull-down config (off)
 The extra control buses `bidir_cs` (drive strength), `bidir_sl` (slew rate), `bidir_pu`,
 and `bidir_pd` (pulls) all stay at `'0` for the scaffold. Drive them unconditionally too.
 
-### Analog pads (`analog[]`)
+(The `oe` does not have to be *static*. A true bidirectional bus — e.g. an SRAM-style data
+port — flips `bidir_oe[i]` at runtime. Keep the generate pattern for direction bits that
+never change; drive `oe`/`ie` from your logic for bits that do.)
 
-These are reserved **5 V analog** pads. They are not wired to logic by default — there is
-no digital data and no `oe`. Leave them alone unless you have a specific analog plan.
+### Analog pads (`analog[]`) — the `asig_5p0` cell
+
+These are reserved **5 V analog** pads — a straight passthrough with no digital buffer and
+no `oe`. They are not wired to logic by default. Leave them alone unless you have a
+specific analog plan.
 
 ---
 
-## How to assign functions to pads (the soft-budget rule)
+## Allocation is yours: bidir is the universal pad
 
-The default slot for this kit is `1x1`, whose budget is **12 input + 40 bidir + 2
-analog** pads. It is tempting to read the input-pad count as a hard limit. It is not.
+The default slot for this kit is `1x1`, whose template ships **12 input + 40 bidir + 2
+analog** pads. It is tempting to read those category counts as a hard, handed-down budget.
+They are not.
 
-> **The pad-category split is *soft* — only the per-slot total is hard.** Because bidir
-> pads are direction-configurable, the `1x1` slot gives you about **52 assignable signal
-> pads** (12 input + 40 bidir; analog separate). A bidir pad set as an input (`oe=0`) is
-> just as good as a dedicated input pad.
+> **The slot standard fixes only the die geometry and the power-pad positions. The split
+> of the *signal* pads into input / bidir / analog is the template's default *allocation*,
+> not a rule.** Because the `bi_24t` cell is a superset, a bidir pad set to `oe=0` is every
+> bit as good as a dedicated input pad.
 
-So if your design needs ten control inputs, put a few on the input pads and route the rest
-onto bidir pads configured as inputs. Assign functions to whatever pads are convenient —
-just stay within the total.
+Two levels of freedom follow from this:
 
-(For the full per-slot numbers, see `02_WAFERSPACE_SUBMISSION.md`.)
+1. **Within the shipped allocation (no `chip_top` edit, the common case).** The `1x1`
+   template already gives you ~**52 assignable signal pads** (12 input + 40 bidir; analog
+   separate). Need ten control inputs? Put a few on the input pads and configure the rest
+   of your bidir pads as inputs (`oe=0`). Assign functions to whatever pads are convenient
+   — just stay within the total.
+
+2. **Changing the allocation itself (a `chip_top` edit, advanced).** Because no rule binds
+   a ring position to a cell type, you *can* re-mix the cells — e.g. make a position the
+   YAML calls "bidir" hold an `in_c` cell, or instantiate `bi_24t` at every signal
+   position for maximum flexibility. That means editing the generate blocks in
+   `chip_top.sv` **and** the matching instance names in the slot YAML — a step-by-step
+   procedure in [`06b — Changing the Pad Ring`](06b_CHANGING_THE_PAD_RING.md).
+
+For most designs you never need level 2 — level 1 (drive bidir pads as inputs) covers it.
+
+(For the full per-slot pad numbers, see `02_WAFERSPACE_SUBMISSION.md`.)
+
+---
+
+## What *not* to touch in `chip_top.sv`
+
+`src/chip_top.sv` is a **do-not-edit boundary** for everyday work. It is copied verbatim
+from the wafer.space project template and contains no design logic of its own — it is pure
+plumbing between the silicon pads and your core. Specifically, do not:
+
+- Rename the pad-ring **generate blocks** (`bidir`, `inputs`, `analog`, `*_pads`). The
+  slot YAML files reference these blocks by instance path to place pads (Layer A ↔ YAML
+  coupling). Rename one and the harden breaks.
+- Remove the required **tapeout IP cells** (more on these in
+  `02_WAFERSPACE_SUBMISSION.md`): `qrcode_id`, `shuttle_id`, `project_id`, and `marker`.
+  The `logo` cell is decorative and may be removed.
+
+The only legitimate reasons to edit `chip_top.sv` are (a) you change which slot you
+target, or (b) you genuinely need a different pad *cell* on some position. Both are covered
+next.
+
+---
+
+## Advanced: changing the pad ring itself
+
+Everything above keeps `chip_top.sv` untouched. The two moves that *do* edit it — giving a
+pad a physically different **cell** (a real type change), or targeting a different
+**slot** — are a separate, step-by-step procedure, because they ripple across
+`chip_top.sv`, the slot YAML, `slot_defines.svh`, and your core's contract in lockstep.
+
+> 📄 See **[`06b — Changing the Pad Ring`](06b_CHANGING_THE_PAD_RING.md)** for the full
+> walkthrough. Neither move is needed for a first design — and remember a bidir pad can
+> already act as an input or output by configuration (see
+> [Allocation is yours](#allocation-is-yours-bidir-is-the-universal-pad)), so most needs
+> never require a ring change at all.
 
 ---
 
@@ -409,8 +534,9 @@ production setup, read it in this order:
 
 1. `README.md` — the Nix-based flow end to end (`make clone-pdk`, `make librelane`,
    simulation).
-2. `src/chip_top.sv` — the complete pad ring you copied in. Your model for the `oe` mask
-   and pad assignment lives in `src/chip_core.sv`.
+2. `src/chip_top.sv` — the complete pad ring you copied in, and the cell instantiations
+   that decide each pin's type (Layer A). Your model for the `oe` mask and pad
+   configuration lives in `src/chip_core.sv` (Layer B).
 3. `librelane/` — the production hardening config (slots, macros, power-delivery network,
    timing constraints).
 
